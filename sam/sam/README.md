@@ -1,4 +1,4 @@
-# Sam Fin AI — personal finance, beautifully understood
+# Finance Book — personal finance, beautifully understood
 
 *Money, managed.* Your personal assistant inside the app is called **Sam**.
 
@@ -8,7 +8,7 @@ Next.js 15 (App Router) + Supabase (Postgres, Auth, Row Level Security). Amounts
 
 **Not built yet:** receipt scanner, assistant actions that change data (add/edit records), admin panel, investments, bills & subscriptions, reports, notification centre, global search.
 
-Sam Fin AI never asks for bank logins, PINs or OTPs.
+Finance Book never asks for bank logins, PINs or OTPs.
 
 ## 1. Create a Supabase project
 1. Create a project at <https://supabase.com>.
@@ -21,11 +21,11 @@ Sam Fin AI never asks for bank logins, PINs or OTPs.
 - Site URL: your public URL (`http://localhost:3000` locally)
 - Redirect URLs: add `http://localhost:3000/auth/callback` and `https://YOUR-DOMAIN/auth/callback`
 
-**Authentication → Providers → Email**: keep it enabled. "Confirm email" on is recommended for production; Sam Fin AI handles both settings.
+**Authentication → Providers → Email**: keep it enabled. "Confirm email" on is recommended for production; Finance Book handles both settings.
 
 **Google sign-in**
 1. <https://console.cloud.google.com> → APIs & Services → Credentials → *Create credentials → OAuth client ID* → type *Web application*.
-2. Authorised redirect URI: `https://<your-project-ref>.supabase.co/auth/v1/callback` (this is Supabase's URL, not Sam Fin AI's).
+2. Authorised redirect URI: `https://<your-project-ref>.supabase.co/auth/v1/callback` (this is Supabase's URL, not Finance Book's).
 3. Copy the Client ID and Client secret into **Supabase → Authentication → Providers → Google** and enable it.
 4. Configure the OAuth consent screen (app name, support email, authorised domain).
 

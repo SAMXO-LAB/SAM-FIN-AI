@@ -9,7 +9,7 @@ export default function NotFound() {
           <span className="eic"><Compass size={26} /></span>
           <h1 className="h2">We couldn’t find that page</h1>
           <p>The link may be old, or the page may have moved.</p>
-          <div className="head-actions" style={{ justifyContent: "center", marginTop: 8 }}><Link className="btn btn-primary" href="/">Go to Sam Fin AI</Link><Link className="btn btn-glass" href="/dashboard">Open dashboard</Link></div>
+          <div className="head-actions" style={{ justifyContent: "center", marginTop: 8 }}><Link className="btn btn-primary" href="/">Go to Finance Book</Link><Link className="btn btn-glass" href="/dashboard">Open dashboard</Link></div>
         </div>
       </div>
     </div>

@@ -11,5 +11,5 @@ export function HeroStage({ children }: { children: React.ReactNode }) {
     el.style.setProperty("--my", ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
   };
   const leave = () => { ref.current?.style.setProperty("--mx", "0"); ref.current?.style.setProperty("--my", "0"); };
-  return <div className="stage" ref={ref} onPointerMove={move} onPointerLeave={leave} aria-label="Preview of the Sam Fin AI dashboard with sample data">{children}</div>;
+  return <div className="stage" ref={ref} onPointerMove={move} onPointerLeave={leave} aria-label="Preview of the Finance Book dashboard with sample data">{children}</div>;
 }

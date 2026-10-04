@@ -7,7 +7,7 @@ import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
 
 export const metadata: Metadata = {
-  title: { default: "Sam Fin AI · Your money, beautifully understood", template: "%s · Sam Fin AI" },
+  title: { default: "Finance Book · Your money, beautifully understood", template: "%s · Finance Book" },
   description: "One intelligent place for your spending, savings, loans, goals and financial future.",
 };
 

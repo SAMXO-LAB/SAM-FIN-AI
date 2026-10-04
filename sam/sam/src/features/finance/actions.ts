@@ -86,7 +86,7 @@ export async function addLoan(_: ActionState, fd: FormData): Promise<ActionState
   const { data, error } = await supabase.from("loans").insert(loan).select("id").single();
   if (error || !data) return fail("add the loan", error ?? undefined);
   if (paid_count > 0) {
-    // Record instalments already paid before the loan was added to Sam Fin AI (no transactions are created for them).
+    // Record instalments already paid before the loan was added to Finance Book (no transactions are created for them).
     const s = loanSummary({ ...loan, annual_rate: loan.annual_rate }, 0);
     const rows = s.rows.slice(0, paid_count).map((r) => ({ loan_id: data.id, installment_no: r.n, paid_on: r.date, amount: r.emi }));
     const { error: e2 } = await supabase.from("loan_payments").insert(rows);

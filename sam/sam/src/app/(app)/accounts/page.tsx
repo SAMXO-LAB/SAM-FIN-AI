@@ -27,7 +27,7 @@ export default async function AccountsPage() {
   };
   return (
     <>
-      <PageHead eyebrow="Where your money lives" title="Accounts" sub="Sam Fin AI never asks for bank passwords or OTPs. Add accounts by name and keep balances current by recording transactions."
+      <PageHead eyebrow="Where your money lives" title="Accounts" sub="Finance Book never asks for bank passwords or OTPs. Add accounts by name and keep balances current by recording transactions."
         actions={<AccountButton trigger={<><Plus size={16} />Add account</>} />} />
       <div className="stat-row">
         <Stat k="Total balance" v={formatINR(total)} d={`${accounts.length} accounts`} />

@@ -1,4 +1,4 @@
-/** Sam Fin AI mark: rising bars that form an "i". Colours are fixed brand values (#1D4ED8 / white). */
+/** Finance Book mark: rising bars that form an "i". Colours are fixed brand values (#1D4ED8 / white). */
 export function LogoMark({ size = 30 }: { size?: number }) {
   return (
     <svg className="brand-mark" width={size} height={size} viewBox="0 0 100 100" aria-hidden="true">
@@ -16,7 +16,7 @@ export function Brand({ tagline = false }: { tagline?: boolean }) {
     <span className="brand">
       <LogoMark />
       <span className="brand-text">
-        <span className="brand-word">Sam Fin AI</span>
+        <span className="brand-word">Finance Book</span>
         {tagline && <span className="brand-tag">Money, managed.</span>}
       </span>
     </span>
