@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { runAssistant } from "@/lib/assistant/run";
 import { systemPrompt } from "@/lib/assistant/prompt";
 import { takeMessage } from "@/lib/assistant/limit";
+import { aiConfigured } from "@/lib/assistant/config";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
   const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
   if (origin) { try { if (new URL(origin).host !== host) return json(403, "forbidden"); } catch { return json(403, "forbidden"); } }
 
-  if (!process.env.ANTHROPIC_API_KEY) return json(503, "not_configured");
+  if (!aiConfigured()) return json(503, "not_configured");
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

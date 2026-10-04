@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getProfile } from "@/lib/auth";
 import { PageHead } from "@/components/ui/Page";
+import { aiConfigured } from "@/lib/assistant/config";
 import { AssistantChat } from "./AssistantChat";
 
 export const metadata: Metadata = { title: "Ask Sam" };
@@ -12,7 +13,7 @@ export default async function AssistantPage() {
   return (
     <>
       <PageHead eyebrow="Your money assistant" title="Ask Sam" sub="Plain-language answers about your accounts, spending, loans and goals." />
-      <AssistantChat firstName={first} configured={!!process.env.ANTHROPIC_API_KEY} />
+      <AssistantChat firstName={first} configured={aiConfigured()} />
     </>
   );
 }

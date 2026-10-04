@@ -44,14 +44,22 @@ Import the repo, set the same three environment variables (`NEXT_PUBLIC_SITE_URL
 ## 5. Ask Sam (AI assistant)
 Sam answers questions about the signed-in user's own data (balances, spending, loans and EMIs, money lent/borrowed, budgets, goals) and can run what-if maths such as a loan prepayment. It is **read-only**: it cannot add, edit or delete anything, and it does not give regulated investment advice.
 
-1. Create an API key at <https://console.anthropic.com> (usage is billed per message to your Anthropic account).
-2. Set in `.env.local` and in Vercel (then redeploy):
-   - `ANTHROPIC_API_KEY` — required. Without it the page shows "not set up yet".
-   - `ANTHROPIC_MODEL` — optional. Default `claude-sonnet-5-5`; `claude-haiku-4-5-20251001` is cheaper and faster.
-   - `ASSISTANT_DAILY_LIMIT` — optional. Messages per user per day, default 40.
+**Free option: Google Gemini.**
+1. Open <https://aistudio.google.com>, sign in, click **Get API key** and copy it.
+2. Add it as `GEMINI_API_KEY` in `.env.local` and in Vercel (Settings → Environment Variables), then **redeploy**.
 3. Run the assistant migration (step 1.3) so the daily limit is enforced in the database.
 
-How it stays safe: the key is only used on the server; the route checks the session and same-origin; tools run as the signed-in user so RLS applies; tool results are passed to the model as untrusted data; a user can send at most the daily limit.
+Other providers (set the matching key; or set `AI_PROVIDER` and `AI_API_KEY` explicitly):
+
+| Provider | Key variable | Default model |
+|---|---|---|
+| Google Gemini (free tier) | `GEMINI_API_KEY` | `gemini-3.8-flash` |
+| Groq (free tier) | `GROQ_API_KEY` | `llama-3.3-70b-versatile` |
+| Anthropic Claude (paid) | `ANTHROPIC_API_KEY` | `claude-sonnet-5-5` |
+
+Optional: `AI_MODEL` (e.g. `gemini-3.5-flash-lite` if you hit free-tier limits), `ASSISTANT_DAILY_LIMIT` (messages per user per day, default 40). Model names and free quotas change; check the provider's pricing page. Free tiers may allow the provider to use prompts to improve their products. Use a paid key before real users rely on it.
+
+How it stays safe: the key is only used on the server; the route checks the session and same-origin; tools run as the signed-in user so RLS applies; tool results are passed to the model as untrusted data; each user is limited to a daily message count.
 
 ## Security notes
 - Every table has RLS: a user can only read and write their own rows. Foreign keys are composite `(id, user_id)`, so a row cannot point at another user's data.
