@@ -7,11 +7,15 @@ export function Dialog({ open, onClose, title, children, wide }: {
   open: boolean; onClose: () => void; title: string; children: React.ReactNode; wide?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  // Callers pass a fresh onClose every render; keep it in a ref so the effect below runs once per opening,
+  // not on every parent re-render (which used to pull focus back to the first field mid-typing).
+  const closeRef = useRef(onClose);
+  useEffect(() => { closeRef.current = onClose; });
   useEffect(() => {
     if (!open) return;
     const prev = document.activeElement as HTMLElement | null;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") closeRef.current();
       if (e.key === "Tab" && ref.current) {
         const f = Array.from(ref.current.querySelectorAll<HTMLElement>("button:not([disabled]),input:not([type=hidden]):not([disabled]),select,textarea,a[href]"));
         if (!f.length) return;
@@ -22,12 +26,13 @@ export function Dialog({ open, onClose, title, children, wide }: {
     };
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
-    setTimeout(() => {
-      const el = ref.current?.querySelector<HTMLElement>("[autofocus],input:not([type=hidden]),select,textarea");
-      el?.focus();
+    const t = setTimeout(() => {
+      const root = ref.current;
+      if (!root || root.contains(document.activeElement)) return; // the person already moved into a field
+      root.querySelector<HTMLElement>("[autofocus],input:not([type=hidden]),select,textarea")?.focus();
     }, 50);
-    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; prev?.focus?.(); };
-  }, [open, onClose]);
+    return () => { clearTimeout(t); document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; prev?.focus?.(); };
+  }, [open]);
   if (!open) return null;
   return createPortal(
     <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>

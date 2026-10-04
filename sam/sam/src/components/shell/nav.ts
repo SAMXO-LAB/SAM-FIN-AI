@@ -1,9 +1,10 @@
-export type NavIcon = "LayoutDashboard" | "ArrowLeftRight" | "Wallet" | "Landmark" | "HandCoins" | "Handshake" | "ChartPie" | "Target" | "Settings";
+export type NavIcon = "Sparkles" | "LayoutDashboard" | "ArrowLeftRight" | "Wallet" | "Landmark" | "HandCoins" | "Handshake" | "ChartPie" | "Target" | "Settings";
 export type NavGroup = { group: string; items: { href: string; label: string; icon: NavIcon }[] };
 
 export const NAV: NavGroup[] = [
   { group: "Overview", items: [
     { href: "/dashboard", label: "Dashboard", icon: "LayoutDashboard" },
+    { href: "/assistant", label: "Ask Sam", icon: "Sparkles" },
     { href: "/transactions", label: "Transactions", icon: "ArrowLeftRight" },
     { href: "/accounts", label: "Accounts", icon: "Wallet" },
   ] },

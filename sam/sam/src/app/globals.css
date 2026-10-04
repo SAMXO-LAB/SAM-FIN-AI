@@ -787,3 +787,29 @@ html,body{overflow-x:clip}
 
 /* setup checklist: let labels wrap on narrow phones instead of truncating */
 section[aria-label="Get set up"] .row .t{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.3}
+
+/* ═════════ Ask Sam (assistant chat) ═════════ */
+.chat{height:calc(100dvh - 230px);min-height:480px}
+.chat-log{scroll-behavior:auto}
+.chat-empty{margin:auto;max-width:560px;display:grid;gap:12px;justify-items:center;text-align:center;padding:12px}
+.ai-dot.big{width:56px;height:56px;border-radius:18px;animation:twinkle 3.2s ease-in-out infinite}
+.ai-dot.big svg{width:26px;height:26px}
+.chat-sugg{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:6px}
+.chipbtn.plain{cursor:pointer;background:var(--g2);transition:transform .25s var(--spring,var(--ease)),border-color .2s,background .2s;padding:0 14px;height:auto;min-height:36px;text-align:left;line-height:1.3;padding-block:8px}
+.chipbtn.plain:hover:not(:disabled){transform:translateY(-2px);border-color:var(--accent);background:var(--accent-soft)}
+.chipbtn.plain:disabled{opacity:.55;cursor:not-allowed}
+.ai-row{display:flex;gap:10px;align-items:flex-start;max-width:min(760px,100%);animation:rise .4s var(--ease) both}
+.ai-row .bubble.ai{max-width:100%;min-width:0;overflow-wrap:anywhere}
+.bubble.me{animation:rise .35s var(--ease) both;white-space:pre-wrap;overflow-wrap:anywhere}
+.bubble .used{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.bubble .md p{margin:0 0 8px}.bubble .md p:last-child{margin:0}
+.bubble .md ul,.bubble .md ol{margin:6px 0 8px;padding-left:20px}
+.bubble .md code{font-family:var(--f-mono);font-size:.9em;background:var(--well);padding:1px 5px;border-radius:6px}
+.bubble-foot{display:flex;align-items:center;gap:8px;margin-top:8px}
+.icon-btn.sm{width:28px;height:28px;border-radius:9px}
+.bubble .notice{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.chat-form{align-items:flex-end}
+.chat-input{height:auto;min-height:48px;max-height:140px;padding:13px 16px;resize:none;line-height:1.4;font:inherit}
+.chat-send{width:48px;height:48px;padding:0;flex:none;border-radius:16px}
+.chat-note{margin:8px 4px 0;text-align:center}
+@media (max-width:900px){.chat{height:calc(100dvh - 250px);min-height:420px}.chat-log{padding:14px}}

@@ -153,6 +153,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
               <p className="small muted" style={{ margin: 0 }}>Sam compares each category’s last 30 days with its previous 3-month average and flags meaningful jumps.</p>
             </>
           )}
+          <Link href="/assistant" className="link" style={{ alignSelf: "end" }}>Ask Sam a question <ChevronRight size={14} /></Link>
         </section>
 
         <section className="card g2 s4 half">

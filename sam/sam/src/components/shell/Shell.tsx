@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
-  ArrowLeftRight, ChartPie, ChevronRight, Ellipsis, HandCoins, Handshake, House, Landmark, LayoutDashboard, LogOut, Plus, Settings, Target, Wallet,
+  ArrowLeftRight, ChartPie, ChevronRight, Ellipsis, HandCoins, Handshake, House, Landmark, LayoutDashboard, LogOut, Plus, Settings, Sparkles, Target, Wallet,
 } from "lucide-react";
 import { Brand } from "@/components/Brand";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -13,7 +13,7 @@ import { signOut } from "@/features/auth/actions";
 import type { AccountWithBalance, Category } from "@/types/db";
 import { NAV } from "./nav";
 
-const ICONS = { LayoutDashboard, ArrowLeftRight, Wallet, Landmark, HandCoins, Handshake, ChartPie, Target, Settings } as const;
+const ICONS = { Sparkles, LayoutDashboard, ArrowLeftRight, Wallet, Landmark, HandCoins, Handshake, ChartPie, Target, Settings } as const;
 const initials = (n: string) => n.trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase() || "?";
 
 export function Shell({ name, email, accounts, categories, children }: {
@@ -56,8 +56,8 @@ export function Shell({ name, email, accounts, categories, children }: {
         <Link href="/dashboard" className={`bn-item${active("/dashboard") ? " active" : ""}`}><House size={20} />Home</Link>
         <Link href="/transactions" className={`bn-item${active("/transactions") ? " active" : ""}`}><ArrowLeftRight size={20} />Activity</Link>
         <TransactionButton accounts={accounts} categories={categories} triggerClass="bn-add" label="Add transaction" trigger={<Plus size={24} />} />
-        <Link href="/goals" className={`bn-item${active("/goals") ? " active" : ""}`}><Target size={20} />Goals</Link>
-        <button className={`bn-item${["/dashboard", "/transactions", "/goals"].some(active) ? "" : " active"}`} onClick={() => setMore(true)}><Ellipsis size={20} />More</button>
+        <Link href="/assistant" className={`bn-item${active("/assistant") ? " active" : ""}`}><Sparkles size={20} />Sam</Link>
+        <button className={`bn-item${["/dashboard", "/transactions", "/assistant"].some(active) ? "" : " active"}`} onClick={() => setMore(true)}><Ellipsis size={20} />More</button>
       </nav>
       <Dialog open={more} onClose={() => setMore(false)} title="All sections">
         <div className="rows">
