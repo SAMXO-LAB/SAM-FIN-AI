@@ -16,6 +16,15 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Supabase reports a failed or repeated Google sign-in as "/?error=…" on the Site URL. Show the sign-in page with a message.
+  if (pathname === "/" && (searchParams.has("error") || searchParams.has("error_code"))) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.search = "";
+    url.searchParams.set("error", "oauth");
+    return NextResponse.redirect(url);
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(

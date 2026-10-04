@@ -61,6 +61,10 @@ Optional: `AI_MODEL` (e.g. `gemini-3.5-flash-lite` if you hit free-tier limits),
 
 How it stays safe: the key is only used on the server; the route checks the session and same-origin; tools run as the signed-in user so RLS applies; tool results are passed to the model as untrusted data; each user is limited to a daily message count.
 
+## 6. Legal pages
+`/privacy` and `/terms` are public pages (linked from the footer, sign-up and sign-in). They describe what the app actually does today (Supabase, Vercel, Google sign-in, an AI provider, no analytics). **If you change any of that (add analytics, change AI provider, store chats), update `src/app/privacy/page.tsx`.** Have a lawyer review both before you rely on them.
+Set `NEXT_PUBLIC_CONTACT_EMAIL` to show a contact address on both pages.
+
 ## Security notes
 - Every table has RLS: a user can only read and write their own rows. Foreign keys are composite `(id, user_id)`, so a row cannot point at another user's data.
 - Server actions validate input with Zod and re-check the session with `getUser()`.

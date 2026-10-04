@@ -66,7 +66,7 @@ export function SignupForm() {
         </div>
         <FormError state={state} />
         <SubmitButton className="btn btn-primary btn-block" pending="Creating account…">Create account</SubmitButton>
-        <p className="hint" style={{ margin: 0, textAlign: "center" }}>By continuing you agree to Finance Book’s terms and privacy policy.</p>
+        <p className="hint" style={{ margin: 0, textAlign: "center" }}>By continuing you agree to Finance Book’s <Link href="/terms" className="text-link">Terms</Link> and <Link href="/privacy" className="text-link">Privacy Policy</Link>.</p>
       </form>
       <p className="auth-foot">Already have an account? <Link href="/login">Sign in</Link></p>
     </div>
