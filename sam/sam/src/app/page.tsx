@@ -260,7 +260,7 @@ export default async function Home() {
         <div><h4>Product</h4><ul><li><a href="#features">Features</a></li><li><a href="#assistant">Meet Sam</a></li><li><a href="#emi">Loans &amp; EMIs</a></li></ul></div>
         <div><h4>Account</h4><ul><li><Link href="/signup">Create account</Link></li><li><Link href="/login">Sign in</Link></li><li><a href="#security">Security</a></li></ul></div>
         <div><h4>Legal</h4><ul><li><Link href="/privacy">Privacy Policy</Link></li><li><Link href="/terms">Terms of Service</Link></li></ul></div>
-        <div className="legal"><span>© {new Date().getFullYear()} Finance Book</span><span>Finance Book is a money management tool, not a registered investment adviser. Product screens show sample data.</span></div>
+        <div className="legal"><span>© {new Date().getFullYear()} Finance Book · Developed by Chandra Shekar</span><span>Finance Book is a money management tool, not a registered investment adviser. Product screens show sample data.</span></div>
       </footer>
     </>
   );
