@@ -608,6 +608,7 @@ a.btn{text-decoration:none}
 .side .brand{padding:4px 12px 20px}
 .nav-item{text-decoration:none}
 .mob-brand svg{width:30px;height:30px}
+.mob-brand .brand{font-size:18px}
 .user-menu{position:relative}
 .onb{min-height:100dvh;display:grid;place-items:center;padding:32px 16px}
 .onb .sheet{animation:none}
@@ -783,3 +784,6 @@ a.btn{text-decoration:none}
 
 /* off-screen reveal start positions must never create sideways scroll */
 html,body{overflow-x:clip}
+
+/* setup checklist: let labels wrap on narrow phones instead of truncating */
+section[aria-label="Get set up"] .row .t{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.3}

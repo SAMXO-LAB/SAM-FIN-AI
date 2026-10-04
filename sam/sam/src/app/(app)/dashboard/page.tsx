@@ -25,7 +25,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const [profile, accounts, categories, tx, loans, debts, goals, budgets] = await Promise.all([
     getProfile(), getAccounts(), getCategories(), getTransactions({ from: iso(addDays(ref, -365)) }), getLoans(), getDebts(), getGoals(), getBudgets(),
   ]);
-  const first = (profile?.full_name || "there").split(" ")[0];
+  const rawFirst = (profile?.full_name || "there").trim().split(" ")[0];
+  const first = rawFirst.charAt(0).toUpperCase() + rawFirst.slice(1);
   const catById = new Map(categories.map((c) => [c.id, c]));
   const catName = (id: string | null) => (id && catById.get(id)?.name) || "Uncategorised";
   const txl = tx.map((x) => ({ ...x, category: catName(x.category_id) }));

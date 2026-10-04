@@ -6,6 +6,16 @@ const PROTECTED = ["/dashboard", "/transactions", "/accounts", "/loans", "/lent"
 const AUTH_ONLY_GUESTS = ["/login", "/signup", "/forgot-password"];
 
 export async function updateSession(request: NextRequest) {
+  // Safety net: if Supabase falls back to the Site URL (redirect URL not on its allow-list) it lands on
+  // "/?code=…". Hand that code to the real callback so the sign-in still completes.
+  const { pathname, searchParams } = request.nextUrl;
+  if (pathname === "/" && searchParams.has("code")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/callback";
+    url.searchParams.set("next", "/dashboard");
+    return NextResponse.redirect(url);
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(

@@ -5,7 +5,7 @@ import { useState } from "react";
 import {
   ArrowLeftRight, ChartPie, ChevronRight, Ellipsis, HandCoins, Handshake, House, Landmark, LayoutDashboard, LogOut, Plus, Settings, Target, Wallet,
 } from "lucide-react";
-import { Brand, LogoMark } from "@/components/Brand";
+import { Brand } from "@/components/Brand";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Dialog } from "@/components/ui/Dialog";
 import { TransactionButton } from "@/features/finance/forms";
@@ -43,7 +43,7 @@ export function Shell({ name, email, accounts, categories, children }: {
       </aside>
       <div className="main">
         <header className="topbar g1">
-          <Link href="/dashboard" className="mob-brand" aria-label="Sam Fin AI dashboard"><LogoMark /></Link>
+          <Link href="/dashboard" className="mob-brand" aria-label="Sam Fin AI dashboard"><Brand /></Link>
           <span className="sp" />
           <ThemeToggle />
           <span className="hide-mob">
