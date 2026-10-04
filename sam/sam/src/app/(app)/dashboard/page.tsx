@@ -8,6 +8,7 @@ import { getAccounts, getBudgets, getCategories, getDebts, getGoals, getLoans, g
 import { addDays, fmtDate, fmtShort, iso, parseISO, relDay, today } from "@/lib/dates";
 import { debtSummary, loanSummary, spendByCategory, sumRange } from "@/lib/finance";
 import { compactINR, formatINR, pct } from "@/lib/money";
+import { CountUp } from "@/components/motion/CountUp";
 import { cashflowSeries, spendingInsights } from "@/lib/analytics";
 import { CashFlowChart } from "@/components/charts/CashFlowChart";
 import { Donut } from "@/components/charts/Donut";
@@ -101,7 +102,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         <section className="overview g3 s12" aria-label="Financial overview">
           <div>
             <div className="eyebrow">Net worth</div>
-            <div className="big-num" style={{ marginTop: 10 }}>{formatINR(net)}</div>
+            <div className="big-num" style={{ marginTop: 10 }}><CountUp to={net} paise /></div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
               <span className={`pill plain ${r30.net >= 0 ? "pos" : "neg"}`}>{formatINR(r30.net, { sign: true })} in 30 days</span>
               <span className="pill plain">Balance {compactINR(balance)}</span>
@@ -109,12 +110,12 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
             <p className="xs muted" style={{ margin: "14px 0 0" }}>Accounts {compactINR(balance)} + owed to you {compactINR(owedToYou)} − loans {compactINR(loanOut)} − borrowed {compactINR(youOwe)}</p>
           </div>
           <div className="kpis">
-            <div className="kpi"><div className="k"><ArrowDownLeft size={14} />Income · 30d</div><div className="v">{formatINR(r30.income)}</div><div className="d muted">{delta(r30.income, p30.income)}</div></div>
-            <div className="kpi"><div className="k"><ArrowUpRight size={14} />Expenses · 30d</div><div className="v">{formatINR(r30.expense)}</div><div className={`d ${p30.expense && r30.expense > p30.expense ? "warn-t" : "muted"}`}>{delta(r30.expense, p30.expense)}</div></div>
-            <div className="kpi"><div className="k"><PiggyBank size={14} />Saved · 30d</div><div className={`v ${r30.net >= 0 ? "pos-t" : "neg-t"}`}>{formatINR(r30.net)}</div><div className="d muted">Savings rate {pct(rate, 1)}</div></div>
-            <div className="kpi"><div className="k"><Wallet size={14} />Available cash</div><div className="v">{formatINR(available)}</div><div className="d muted">Excludes savings accounts</div></div>
-            <div className="kpi"><div className="k"><Landmark size={14} />EMIs per month</div><div className="v">{formatINR(emiMonthly)}</div><div className="d muted">{loanStats.filter((x) => x.s.next).length} active loans</div></div>
-            <div className="kpi"><div className="k"><TrendingUp size={14} />Owed to you</div><div className="v">{formatINR(owedToYou)}</div><div className="d muted">{lentOpen.length} people</div></div>
+            <div className="kpi"><div className="k"><ArrowDownLeft size={14} />Income · 30d</div><div className="v"><CountUp to={r30.income} paise /></div><div className="d muted">{delta(r30.income, p30.income)}</div></div>
+            <div className="kpi"><div className="k"><ArrowUpRight size={14} />Expenses · 30d</div><div className="v"><CountUp to={r30.expense} paise /></div><div className={`d ${p30.expense && r30.expense > p30.expense ? "warn-t" : "muted"}`}>{delta(r30.expense, p30.expense)}</div></div>
+            <div className="kpi"><div className="k"><PiggyBank size={14} />Saved · 30d</div><div className={`v ${r30.net >= 0 ? "pos-t" : "neg-t"}`}><CountUp to={r30.net} paise /></div><div className="d muted">Savings rate {pct(rate, 1)}</div></div>
+            <div className="kpi"><div className="k"><Wallet size={14} />Available cash</div><div className="v"><CountUp to={available} paise /></div><div className="d muted">Excludes savings accounts</div></div>
+            <div className="kpi"><div className="k"><Landmark size={14} />EMIs per month</div><div className="v"><CountUp to={emiMonthly} paise /></div><div className="d muted">{loanStats.filter((x) => x.s.next).length} active loans</div></div>
+            <div className="kpi"><div className="k"><TrendingUp size={14} />Owed to you</div><div className="v"><CountUp to={owedToYou} paise /></div><div className="d muted">{lentOpen.length} people</div></div>
           </div>
         </section>
 

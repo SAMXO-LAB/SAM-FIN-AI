@@ -557,8 +557,10 @@ table.t{width:100%;border-collapse:collapse;font-size:14px;min-width:720px}
   .mini-kpis .v{font-size:13.5px}
 }
 @media (prefers-reduced-motion: reduce){
-  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.001ms!important;transition-delay:0s!important;scroll-behavior:auto!important}
   .draw{stroke-dashoffset:0}
+  .marq-track,.logo-loader .lm-b{animation:none!important}
+  .scroll-progress{display:none}
 }
 
 /* ───────── SAM additions ───────── */
@@ -614,3 +616,170 @@ a.btn{text-decoration:none}
 @keyframes rot{to{transform:rotate(360deg)}}
 .auth-mobile-brand{display:none}
 @media (max-width:900px){.auth-mobile-brand{display:block;position:absolute;top:16px;left:16px}}
+
+
+/* ═════════════ MOTION ═════════════
+   Rules: every hidden "from" state lives inside a keyframe (fill: backwards/both) or behind
+   html.motion-ready, which is only added when JS runs and reduced motion is NOT requested.
+   Float animations use the `translate` property so they never fight the parallax `transform`. */
+
+/* ── logo mark: bars rise, dot drops ── */
+.lm-b{transform-box:fill-box;transform-origin:50% 100%;animation:barUp .9s var(--ease) calc(.25s + var(--k)*.12s) backwards}
+.lm-dot{transform-box:fill-box;transform-origin:50% 50%;animation:dotDrop .8s var(--spring,var(--ease)) .75s backwards}
+.brand-mark{transition:rotate .5s var(--spring,var(--ease)),scale .5s var(--spring,var(--ease))}
+.brand:hover .brand-mark{rotate:-7deg;scale:1.08}
+.logo-loader{display:inline-grid;place-items:center}
+.logo-loader .lm-b{animation:barPulse 1.1s ease-in-out infinite calc(var(--k)*.14s)}
+.logo-loader .lm-dot{animation:dotBob 1.1s ease-in-out infinite .42s}
+@keyframes barUp{from{transform:scaleY(0)}}
+@keyframes dotDrop{0%{transform:translateY(-60px) scale(.2);opacity:0}60%{opacity:1}100%{transform:none}}
+@keyframes barPulse{50%{transform:scaleY(.55)}}
+@keyframes dotBob{50%{transform:translateY(-5px)}}
+
+/* ── scroll progress + nav ── */
+.scroll-progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:90;pointer-events:none;transform-origin:0 50%;transform:scaleX(var(--sp,0));background:linear-gradient(90deg,var(--accent),var(--c3,#8b5cf6),var(--accent-2))}
+.lp-nav .bar{animation:navIn 1s var(--ease) .05s backwards;transition:box-shadow .4s,background .4s}
+.lp-nav.scrolled .bar{box-shadow:inset 0 1px 0 var(--hl),0 18px 40px -18px rgba(14,23,60,.35)}
+@keyframes navIn{from{opacity:0;transform:translateY(-28px) scale(.97)}}
+
+/* ── background light field drifts with scroll ── */
+.o1{translate:0 calc(var(--sy,0)*-.10px)}
+.o2{translate:calc(var(--sy,0)*-.04px) calc(var(--sy,0)*.08px)}
+.o3{translate:calc(var(--sy,0)*.05px) calc(var(--sy,0)*-.06px)}
+
+/* ── hero load sequence ── */
+.hi{animation:heroIn .9s var(--ease) both}
+.hi1{animation-delay:.1s}.hi3{animation-delay:.85s}.hi4{animation-delay:1s}.hi5{animation-delay:1.15s}
+@keyframes heroIn{from{opacity:0;transform:translateY(22px)}}
+.display .w{display:inline-block;overflow:hidden;vertical-align:top;padding:0 .08em .16em;margin:0 -.08em -.16em}
+.display .w>span{display:inline-block;animation:wordUp 1.05s var(--ease) calc(.3s + var(--i)*.11s) backwards}
+@keyframes wordUp{from{transform:translateY(112%) rotate(5deg)}}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .display em .w>span{background:linear-gradient(100deg,var(--ink) 38%,var(--accent) 50%,var(--ink) 62%) 100% 0/280% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    animation:wordUp 1.05s var(--ease) calc(.3s + var(--i)*.11s) backwards,inkSweep 7s ease-in-out 2.4s infinite}
+}
+@keyframes inkSweep{0%,55%{background-position:100% 0}85%,100%{background-position:0 0}}
+.hero-badge b{animation:badgePulse 2.6s ease-in-out 1.4s infinite}
+@keyframes badgePulse{0%,100%{box-shadow:0 0 0 0 var(--accent-soft)}50%{box-shadow:0 0 0 7px transparent}}
+
+/* hero product shot: assemble, then float */
+.stage>*{animation:stageIn 1.1s var(--ease) var(--sd,.5s) backwards,floatY var(--fd,7s) ease-in-out calc(var(--sd,.5s) + 1.1s) infinite}
+.s-main{--sd:.45s;--fd:9s}.s-ai{--sd:1s;--fd:6.2s}.s-emi{--sd:1.15s;--fd:7.4s}.s-owe{--sd:1.3s;--fd:5.6s}
+@keyframes stageIn{from{opacity:0;scale:.9;translate:0 46px}}
+@keyframes floatY{50%{translate:0 -9px}}
+.s-ai .ai-dot{animation:twinkle 3.2s ease-in-out 2s infinite}
+.ai-dot svg{transform-origin:50% 50%}
+@keyframes twinkle{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.18) rotate(14deg)}}
+.big-num .countup{display:inline-block}
+
+/* sparkline sweeps in, its end dot pulses */
+.sp-clip{animation:sweepX 1.9s var(--ease) .95s backwards}
+@keyframes sweepX{from{clip-path:inset(-8px 100% -8px -8px)}to{clip-path:inset(-8px -8px -8px -8px)}}
+.sp-dot{animation:dotPulse 2.4s ease-in-out 2.8s infinite;transform-box:fill-box;transform-origin:center}
+@keyframes dotPulse{50%{transform:scale(1.9);opacity:.55}}
+
+/* EMI progress segments fill one by one */
+.segs i.on{animation:segOn .55s var(--ease) calc(var(--sb,0s) + var(--k)*55ms) backwards}
+.hero-segs{--sb:1.9s}
+@keyframes segOn{from{background:var(--track);transform:scaleY(.35)}}
+
+/* primary buttons: slow shine + nudging arrow */
+.btn.shine{position:relative;overflow:hidden}
+.btn.shine::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.34) 50%,transparent 65%);transform:translateX(-130%);animation:shine 5s ease-in-out 2.4s infinite}
+.btn.shine svg{animation:nudge 2.4s ease-in-out 2.6s infinite}
+@keyframes shine{0%,60%{transform:translateX(-130%)}100%{transform:translateX(130%)}}
+@keyframes nudge{50%{transform:translateX(4px)}}
+.btn:active{transform:scale(.97)}
+
+/* ── marquee of what's inside ── */
+.marquee{overflow:hidden;padding-block:18px 6px;margin-top:8px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
+.marq-track{display:flex;width:max-content;animation:marq 48s linear infinite}
+.marquee:hover .marq-track{animation-play-state:paused}
+.marq-set{display:flex;gap:12px;padding-right:12px}
+.marq-chip{display:inline-flex;align-items:center;gap:9px;height:44px;padding:0 20px 0 16px;border-radius:999px;font-size:14px;font-weight:540;color:var(--ink-2);white-space:nowrap}
+.marq-chip svg{color:var(--accent)}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+/* ── scroll reveals (only when JS is running and motion is allowed) ── */
+.motion-ready [data-reveal]{opacity:0;transition:opacity .9s var(--ease) var(--d,0s),translate 1s var(--ease) var(--d,0s),scale 1s var(--ease) var(--d,0s),clip-path 1.15s var(--ease) var(--d,0s)}
+.motion-ready [data-reveal=up]{translate:0 44px}
+.motion-ready [data-reveal=left]{translate:-56px 0}
+.motion-ready [data-reveal=right]{translate:56px 0}
+.motion-ready [data-reveal=scale]{translate:0 30px;scale:.94}
+/* wipe: the block itself stays measurable for the observer; its children are unmasked one after another */
+.motion-ready [data-reveal=wipe]>*{clip-path:inset(0 0 100% 0);translate:0 22px;transition:clip-path 1.1s var(--ease) calc(var(--w,0)*.14s),translate 1.1s var(--ease) calc(var(--w,0)*.14s)}
+.motion-ready [data-reveal=wipe]>*:nth-child(2){--w:1}.motion-ready [data-reveal=wipe]>*:nth-child(3){--w:2}
+.motion-ready [data-reveal].is-in{opacity:1;translate:0 0;scale:1}
+.motion-ready [data-reveal=wipe].is-in>*{clip-path:inset(-10% -5% -30% -5%);translate:0 0}
+/* anything inside a not-yet-visible block waits its turn, and offscreen loops cost nothing */
+.motion-ready [data-reveal]:not(.is-in) *,.motion-ready [data-reveal]:not(.is-in) *::before,.motion-ready [data-reveal]:not(.is-in) *::after{animation-play-state:paused!important}
+
+/* ── pointer spotlight on glass cards ── */
+.spot::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;opacity:0;transition:opacity .35s;background:radial-gradient(380px circle at var(--px,50%) var(--py,50%),var(--accent-soft),transparent 62%)}
+.spot:hover::after{opacity:1}
+
+/* ── data comes alive inside the bento tiles ── */
+.cf-bar{transform-box:fill-box;transform-origin:50% 100%;animation:barUp .9s var(--ease) calc(var(--d,0s) + .25s + var(--k)*55ms) backwards}
+.stackbar{animation:sweepX2 1.2s var(--ease) .3s backwards}
+@keyframes sweepX2{from{clip-path:inset(0 100% 0 0 round 999px)}to{clip-path:inset(0 0 0 0 round 999px)}}
+.ring-fill{animation:ringIn 1.5s var(--ease) .35s backwards}
+@keyframes ringIn{from{stroke-dasharray:0 999}}
+.rows .row{animation:rowIn .7s var(--ease) calc(.35s + var(--r,0)*.12s) backwards}
+.rows .row:nth-child(2){--r:1}.rows .row:nth-child(3){--r:2}.rows .row:nth-child(4){--r:3}
+@keyframes rowIn{from{opacity:0;transform:translateX(-18px)}}
+.bar>i{animation-delay:.2s}
+.insight .calcbox .ln{animation:rowIn .7s var(--ease) calc(.5s + var(--r,0)*.18s) backwards}
+.insight .calcbox .ln:nth-child(2){--r:1}.insight .calcbox .ln:nth-child(3){--r:2}
+.insight .calcbox .ln.tot{animation:rowIn .7s var(--ease) 1.05s backwards,flashTot 2.4s ease-in-out 1.9s 2}
+@keyframes flashTot{50%{background:var(--accent-soft)}}
+.sched tbody tr{animation:rowIn .6s var(--ease) calc(.3s + var(--r,0)*.1s) backwards}
+.sched tbody tr:nth-child(2){--r:1}.sched tbody tr:nth-child(3){--r:2}.sched tbody tr:nth-child(4){--r:3}.sched tbody tr:nth-child(5){--r:4}
+.sched tr.cur td{background:linear-gradient(90deg,var(--accent-soft),transparent 70%) 0 0/220% 100%;animation:curSweep 3.2s ease-in-out 1.4s infinite}
+@keyframes curSweep{0%,100%{background-position:100% 0}50%{background-position:0 0}}
+
+/* security cards: icon pops in */
+.sec-card .pi{animation:popSpin .9s var(--spring,var(--ease)) calc(var(--d,0s) + .35s) backwards}
+@keyframes popSpin{from{transform:scale(0) rotate(-120deg)}}
+.sec-card:hover .pi svg{animation:wiggle .6s ease-in-out}
+@keyframes wiggle{25%{transform:rotate(-14deg)}60%{transform:rotate(10deg)}}
+
+/* phone floats, orbs breathe, add button pings */
+.phone{animation:phoneFloat 8s ease-in-out infinite}
+@keyframes phoneFloat{50%{translate:0 -14px;rotate:.8deg}}
+.phone-wrap{display:flex;justify-content:center}
+.ph-nav .add{animation:ping 2.6s ease-out infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 var(--accent-soft)}70%,100%{box-shadow:0 0 0 14px transparent}}
+.ph-card .stat{animation:heroIn .8s var(--ease) .6s backwards}
+
+/* closing call to action: a light travels round the edge */
+@property --ang{syntax:"<angle>";inherits:false;initial-value:0deg}
+.cta-band::after{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:2px;pointer-events:none;background:conic-gradient(from var(--ang),transparent 0 62%,var(--accent) 82%,var(--accent-2) 90%,transparent 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);animation:spinAng 7s linear infinite}
+@keyframes spinAng{to{--ang:360deg}}
+
+/* ═════════ inside the app ═════════ */
+.kpis .kpi{animation:rise .7s var(--ease) calc(.18s + var(--r,0)*70ms) both}
+.kpis .kpi:nth-child(2){--r:1}.kpis .kpi:nth-child(3){--r:2}.kpis .kpi:nth-child(4){--r:3}.kpis .kpi:nth-child(5){--r:4}.kpis .kpi:nth-child(6){--r:5}
+.donut circle:nth-child(n+2){animation:ringIn 1.1s var(--ease) calc(.2s + (var(--r,0))*.14s) backwards}
+.donut circle:nth-child(3){--r:1}.donut circle:nth-child(4){--r:2}.donut circle:nth-child(5){--r:3}.donut circle:nth-child(6){--r:4}.donut circle:nth-child(7){--r:5}.donut circle:nth-child(8){--r:6}
+.view .row{animation:rowIn .55s var(--ease) calc(.15s + var(--r,0)*50ms) backwards}
+.view .row:nth-child(2){--r:1}.view .row:nth-child(3){--r:2}.view .row:nth-child(4){--r:3}.view .row:nth-child(5){--r:4}.view .row:nth-child(6){--r:5}.view .row:nth-child(n+7){--r:6}
+.nav-item{transition:background .25s,color .25s,translate .35s var(--spring,var(--ease))}
+.nav-item:hover{translate:3px 0}
+.bn-add{animation:ping 3.2s ease-out 1.5s infinite}
+.card-pop{animation:pop .5s var(--ease) both}
+.onb .sheet>div:not([aria-label]){animation:stepIn .55s var(--ease) both}
+@keyframes stepIn{from{opacity:0;transform:translateX(26px)}}
+
+/* auth */
+.auth-card{animation:cardIn .95s var(--ease) .1s backwards}
+@keyframes cardIn{from{opacity:0;transform:translateY(34px) scale(.96)}}
+.auth-aside .quote{animation:heroIn 1s var(--ease) .25s backwards}
+.auth-aside .facts li{animation:rowIn .8s var(--ease) calc(.7s + var(--r,0)*.14s) backwards}
+.auth-aside .facts li:nth-child(2){--r:1}.auth-aside .facts li:nth-child(3){--r:2}
+.auth-aside .facts li svg{color:var(--accent)}
+.google-btn{transition:transform .25s var(--spring,var(--ease)),border-color .2s,box-shadow .25s}
+.google-btn:hover{transform:translateY(-1px);box-shadow:0 10px 24px -14px rgba(14,23,60,.4)}
+.auth-aside .brand,.auth-main .auth-mobile-brand{animation:heroIn .8s var(--ease) both}
+
+/* off-screen reveal start positions must never create sideways scroll */
+html,body{overflow-x:clip}
