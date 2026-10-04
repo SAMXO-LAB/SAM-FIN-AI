@@ -24,7 +24,7 @@ export default async function SettingsPage() {
         </section>
         <section className="card g2 s6"><div className="card-head"><h2 className="h3">Notifications</h2></div><PrefsForm profile={profile} /></section>
         <section className="card g2 s6">
-          <div className="card-head"><div><h2 className="h3">Your data</h2><div className="sub">Download everything you’ve recorded in Sam.</div></div></div>
+          <div className="card-head"><div><h2 className="h3">Your data</h2><div className="sub">Download everything you’ve recorded in Sam Fin AI.</div></div></div>
           <div className="set-row"><div><b>Transactions as CSV</b><span>Opens in Excel, Numbers or Google Sheets</span></div><a className="btn btn-glass btn-sm" href="/api/export?format=csv"><FileSpreadsheet size={15} />Download</a></div>
           <div className="set-row"><div><b>Full backup as JSON</b><span>Accounts, transactions, loans, people, budgets and goals</span></div><a className="btn btn-glass btn-sm" href="/api/export?format=json"><Braces size={15} />Download</a></div>
           <div className="set-row"><div><b>Delete account</b><span>Permanently removes your account and all data</span></div><DeleteAccount /></div>

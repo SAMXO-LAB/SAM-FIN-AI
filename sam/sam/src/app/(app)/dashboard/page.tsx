@@ -84,7 +84,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
       {setupLeft > 0 && (
         <section className="card g3" aria-label="Get set up">
-          <div className="card-head"><div><h3 className="h3">{sp.welcome ? `Welcome to Sam, ${first}` : "Finish setting up"}</h3><div className="sub">{4 - setupLeft} of 4 done. Your dashboard fills in as you go.</div></div></div>
+          <div className="card-head"><div><h3 className="h3">{sp.welcome ? `Welcome to Sam Fin AI, ${first}` : "Finish setting up"}</h3><div className="sub">{4 - setupLeft} of 4 done. Your dashboard fills in as you go.</div></div></div>
           <div className="rows">
             {steps.map((s) => (
               <div className="row" key={s.label}>
@@ -134,7 +134,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
         <section className="insight g3 s4 half">
           <span className="glow" />
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}><span className="ai-dot"><Sparkles size={16} /></span><div><h3 className="h3">Insight</h3><div className="xs muted">From your last 120 days</div></div></div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}><span className="ai-dot"><Sparkles size={16} /></span><div><h3 className="h3">Sam’s insight</h3><div className="xs muted">From your last 120 days</div></div></div>
           {insight ? (
             <>
               <div className="big">Your {insight.cat.toLowerCase()} spending is {pct(insight.pct)} higher than your 3-month average.</div>

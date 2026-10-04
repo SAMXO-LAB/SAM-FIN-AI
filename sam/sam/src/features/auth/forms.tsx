@@ -34,7 +34,7 @@ export function LoginForm({ next, notice }: { next: string; notice?: { tone: "er
         <FormError state={state} />
         <SubmitButton className="btn btn-primary btn-block" pending="Signing in…">Sign in</SubmitButton>
       </form>
-      <p className="auth-foot">New to Sam? <Link href="/signup">Create an account</Link></p>
+      <p className="auth-foot">New to Sam Fin AI? <Link href="/signup">Create an account</Link></p>
     </div>
   );
 }
@@ -66,7 +66,7 @@ export function SignupForm() {
         </div>
         <FormError state={state} />
         <SubmitButton className="btn btn-primary btn-block" pending="Creating account…">Create account</SubmitButton>
-        <p className="hint" style={{ margin: 0, textAlign: "center" }}>By continuing you agree to Sam’s terms and privacy policy.</p>
+        <p className="hint" style={{ margin: 0, textAlign: "center" }}>By continuing you agree to Sam Fin AI’s terms and privacy policy.</p>
       </form>
       <p className="auth-foot">Already have an account? <Link href="/login">Sign in</Link></p>
     </div>
@@ -94,7 +94,7 @@ export function ForgotForm() {
   const [state, action] = useActionState(requestPasswordReset, {});
   return (
     <div className="auth-card g3">
-      <div><h1>Reset your password</h1><p className="sub">Enter the email you use for Sam and we’ll send you a reset link.</p></div>
+      <div><h1>Reset your password</h1><p className="sub">Enter the email you use for Sam Fin AI and we’ll send you a reset link.</p></div>
       {state.ok ? (
         <div className="notice ok" role="status"><MailCheck size={17} />If an account exists for {state.message}, a reset link is on its way. It expires in one hour.</div>
       ) : (
