@@ -87,7 +87,7 @@ export function AccountButton({ account, ...t }: Trig & { account?: AccountWithB
           <div className="field"><label htmlFor="a-bal">{account ? "Current balance (₹)" : "Opening balance (₹)"}</label><input className="input num" id="a-bal" name="balance" inputMode="decimal" defaultValue={account ? paiseToInput(account.balance) : ""} placeholder="0" aria-invalid={inv(s, "balance")} /><FieldError state={s} name="balance" /><span className="hint">For a credit card, enter what you owe as a negative number.</span></div>
           <div className="field"><label htmlFor="a-cur">Currency</label><select className="select" id="a-cur" name="currency" defaultValue={account?.currency ?? "INR"}>{CURRENCIES.map((c) => <option key={c}>{c}</option>)}</select></div>
           <div className="field full"><label htmlFor="a-notes">Notes</label><input className="input" id="a-notes" name="notes" defaultValue={account?.notes ?? ""} maxLength={300} placeholder="Optional" /></div>
-          <p className="hint full" style={{ margin: 0 }}>Finance Book never asks for your login, password or OTP.</p>
+          <p className="hint full" style={{ margin: 0 }}>Finance Book AI never asks for your login, password or OTP.</p>
         </div>
       )}
     </FormDialog>

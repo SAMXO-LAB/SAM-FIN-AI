@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       out[t === "categories" ? "custom_categories" : t] = data;
     }
     return new NextResponse(JSON.stringify(out, null, 2), {
-      headers: { "Content-Type": "application/json; charset=utf-8", "Content-Disposition": `attachment; filename="finance-book-backup-${stamp}.json"`, "Cache-Control": "no-store" },
+      headers: { "Content-Type": "application/json; charset=utf-8", "Content-Disposition": `attachment; filename="finance-book-ai-backup-${stamp}.json"`, "Cache-Control": "no-store" },
     });
   }
 
@@ -38,6 +38,6 @@ export async function GET(request: NextRequest) {
     lines.push([t.occurred_on, t.type, (Number(t.amount) / 100).toFixed(2), cn.get(t.category_id) ?? "", an.get(t.account_id) ?? "", an.get(t.from_account_id) ?? "", an.get(t.to_account_id) ?? "", t.counterparty, t.description, t.payment_method, t.notes].map(cell).join(","));
   }
   return new NextResponse("﻿" + lines.join("\n"), {
-    headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="finance-book-transactions-${stamp}.csv"`, "Cache-Control": "no-store" },
+    headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="finance-book-ai-transactions-${stamp}.csv"`, "Cache-Control": "no-store" },
   });
 }

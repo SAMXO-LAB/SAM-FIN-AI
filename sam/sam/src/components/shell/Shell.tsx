@@ -25,7 +25,7 @@ export function Shell({ name, email, me, accounts, categories, children }: {
   return (
     <div className="app">
       <aside className="side g1" aria-label="Sections">
-        <Link href="/dashboard" aria-label="Finance Book dashboard"><Brand /></Link>
+        <Link href="/dashboard" aria-label="Finance Book AI dashboard"><Brand /></Link>
         {NAV.map((g, i) => (
           <nav className="nav-group" key={i} aria-label={g.group || "Account"}>
             {g.group && <div className="nav-label">{g.group}</div>}
@@ -43,7 +43,7 @@ export function Shell({ name, email, me, accounts, categories, children }: {
       </aside>
       <div className="main">
         <header className="topbar g1">
-          <Link href="/dashboard" className="mob-brand" aria-label="Finance Book dashboard"><Brand /></Link>
+          <Link href="/dashboard" className="mob-brand" aria-label="Finance Book AI dashboard"><Brand /></Link>
           <span className="sp" />
           <ThemeToggle />
           <Link href="/settings" className="av-link show-mob" aria-label="Your profile and settings"><Avatar user={me} size={34} /></Link>

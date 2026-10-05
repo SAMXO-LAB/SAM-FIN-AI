@@ -7,7 +7,7 @@ import { saveOnboarding } from "@/features/profile/actions";
 
 const GOALS = ["Build an emergency fund", "Pay off loans faster", "Save for travel", "Track who owes me", "Control daily spending", "Plan a big purchase"];
 const INCOME = ["Under ₹25,000", "₹25,000 – ₹50,000", "₹50,000 – ₹1 lakh", "₹1 – 2 lakh", "Over ₹2 lakh", "Prefer not to say"];
-const TITLES = ["Welcome to Finance Book", "What matters most to you?", "Stay ahead of due dates"];
+const TITLES = ["Welcome to Finance Book AI", "What matters most to you?", "Stay ahead of due dates"];
 
 export function OnboardingForm({ name }: { name: string }) {
   const [state, action] = useActionState(saveOnboarding, {});
@@ -56,7 +56,7 @@ export function OnboardingForm({ name }: { name: string }) {
       <div style={{ display: step === 2 ? "block" : "none" }}>
         <div className="set-row"><div><b>EMI reminders</b><span>A week before each instalment</span></div><label className="switch"><span className="sr">EMI reminders</span><input type="checkbox" name="notify_emi" defaultChecked /><span /></label></div>
         <div className="set-row"><div><b>Bills and repayments</b><span>Before anything is due</span></div><label className="switch"><span className="sr">Bills and repayments</span><input type="checkbox" name="notify_bills" defaultChecked /><span /></label></div>
-        <p className="notice info" style={{ marginTop: 16 }}><ShieldCheck size={17} />Finance Book never asks for your bank login, card PIN or OTP. You add accounts by name and balance.</p>
+        <p className="notice info" style={{ marginTop: 16 }}><ShieldCheck size={17} />Finance Book AI never asks for your bank login, card PIN or OTP. You add accounts by name and balance.</p>
       </div>
 
       <div style={{ marginTop: 14 }}><FormError state={state} /></div>

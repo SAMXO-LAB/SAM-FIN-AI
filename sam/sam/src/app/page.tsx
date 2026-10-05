@@ -53,7 +53,7 @@ export default async function Home() {
       <LandingMotion />
       <header className="lp-nav">
         <nav className="bar g3" aria-label="Main">
-          <Link href="/" aria-label="Finance Book home"><Brand /></Link>
+          <Link href="/" aria-label="Finance Book AI home"><Brand /></Link>
           <div className="lp-links"><a href="#features">Product</a><a href="#assistant">Sam</a><a href="#emi">EMIs</a><a href="#security">Security</a><a href="#mobile">Mobile</a></div>
           <div className="right">
             <ThemeToggle />
@@ -165,11 +165,11 @@ export default async function Home() {
             <div data-reveal="left">
               <span className="eyebrow">Meet Sam</span>
               <h2 className="h1" style={{ marginTop: 14 }}>Numbers you can <em>check</em>, not guesses.</h2>
-              <p className="lede" style={{ marginTop: 18 }}>Sam, your personal assistant inside Finance Book, explains your money in plain language. Every figure is calculated in code from what you’ve recorded, then labelled so you always know what’s a fact and what’s an estimate.</p>
+              <p className="lede" style={{ marginTop: 18 }}>Sam, your personal assistant inside Finance Book AI, explains your money in plain language. Every figure is calculated in code from what you’ve recorded, then labelled so you always know what’s a fact and what’s an estimate.</p>
               <ul className="points" data-stagger>
                 <li data-reveal="left"><span className="pi"><Database size={18} /></span><div><b>From your records only</b><span>Sam never invents a transaction, a balance or a person.</span></div></li>
                 <li data-reveal="left"><span className="pi"><Calculator size={18} /></span><div><b>Deterministic maths</b><span>EMIs, savings rates and goal plans are computed to the paisa and shown line by line.</span></div></li>
-                <li data-reveal="left"><span className="pi"><BadgeCheck size={18} /></span><div><b>Labelled, not oversold</b><span>Estimates are marked as estimates. Finance Book is a money tool, not an adviser.</span></div></li>
+                <li data-reveal="left"><span className="pi"><BadgeCheck size={18} /></span><div><b>Labelled, not oversold</b><span>Estimates are marked as estimates. Finance Book AI is a money tool, not an adviser.</span></div></li>
               </ul>
             </div>
             <div className="chatmock g3" data-reveal="right">
@@ -214,7 +214,7 @@ export default async function Home() {
         <section className="wrap section" id="security">
           <div className="sec-head" data-reveal="wipe"><span className="eyebrow">Security</span><h2 className="h1">Private by design.</h2><p className="lede">Your financial life deserves the same care a bank gives it, with none of the access a bank would ask for.</p></div>
           <div className="sec-grid" data-stagger>
-            <div data-reveal="scale" className="sec-card spot g2"><span className="pi"><KeyRound size={20} /></span><h3 className="h3">No bank credentials</h3><p>Finance Book never asks for net-banking passwords, card PINs or OTPs. Accounts are added by name and balance.</p></div>
+            <div data-reveal="scale" className="sec-card spot g2"><span className="pi"><KeyRound size={20} /></span><h3 className="h3">No bank credentials</h3><p>Finance Book AI never asks for net-banking passwords, card PINs or OTPs. Accounts are added by name and balance.</p></div>
             <div data-reveal="scale" className="sec-card spot g2"><span className="pi"><Lock size={20} /></span><h3 className="h3">Isolated by default</h3><p>Row-level security means your records are readable only by you, enforced in the database itself.</p></div>
             <div data-reveal="scale" className="sec-card spot g2"><span className="pi"><EyeOff size={20} /></span><h3 className="h3">No ads, no data sales</h3><p>Your data is used to serve you. It is never sold, rented or shared with advertisers.</p></div>
             <div data-reveal="scale" className="sec-card spot g2"><span className="pi"><Archive size={20} /></span><h3 className="h3">Yours to take</h3><p>Download a full CSV or JSON backup whenever you like, and delete your account in a single step.</p></div>
@@ -259,8 +259,8 @@ export default async function Home() {
         <div><div style={{ marginBottom: 14 }}><Brand /></div><p style={{ margin: 0, maxWidth: "36ch" }}>A personal finance manager for spending, savings, loans and the money between friends.</p></div>
         <div><h4>Product</h4><ul><li><a href="#features">Features</a></li><li><a href="#assistant">Meet Sam</a></li><li><a href="#emi">Loans &amp; EMIs</a></li></ul></div>
         <div><h4>Account</h4><ul><li><Link href="/signup">Create account</Link></li><li><Link href="/login">Sign in</Link></li><li><a href="#security">Security</a></li></ul></div>
-        <div><h4>Legal</h4><ul><li><Link href="/privacy">Privacy Policy</Link></li><li><Link href="/terms">Terms of Service</Link></li></ul></div>
-        <div className="legal"><span>© {new Date().getFullYear()} Finance Book · Developed by Chandra Shekar</span><span>Finance Book is a money management tool, not a registered investment adviser. Product screens show sample data.</span></div>
+        <div><h4>Legal</h4><ul><li><Link href="/privacy">Privacy Policy</Link></li><li><Link href="/terms">Terms of Service</Link></li><li><Link href="/delete-account">Delete your account</Link></li></ul></div>
+        <div className="legal"><span>© {new Date().getFullYear()} Finance Book AI · Developed by Chandra Shekar</span><span>Finance Book AI is a money management tool, not a registered investment adviser. Product screens show sample data.</span></div>
       </footer>
     </>
   );

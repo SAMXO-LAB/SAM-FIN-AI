@@ -5,10 +5,13 @@ import "@fontsource/instrument-serif/400.css";
 import "@fontsource/instrument-serif/400-italic.css";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
+import { RegisterSW } from "@/components/RegisterSW";
 
 export const metadata: Metadata = {
-  title: { default: "Finance Book · Your money, beautifully understood", template: "%s · Finance Book" },
+  title: { default: "Finance Book AI · Your money, beautifully understood", template: "%s · Finance Book AI" },
   description: "One intelligent place for your spending, savings, loans, goals and financial future.",
+  applicationName: "Finance Book AI",
+  appleWebApp: { capable: true, title: "Finance Book AI", statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = {
@@ -35,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="orb o1" /><div className="orb o2" /><div className="orb o3" /><div className="grain" />
         </div>
         <ToastProvider>{children}</ToastProvider>
+        <RegisterSW />
       </body>
     </html>
   );

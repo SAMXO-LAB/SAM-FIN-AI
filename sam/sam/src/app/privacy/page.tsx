@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { ContactLine, LegalLayout } from "@/components/Legal";
 
-export const metadata: Metadata = { title: "Privacy Policy", description: "What Finance Book collects, why, who sees it, and how to download or delete your data." };
+export const metadata: Metadata = { title: "Privacy Policy", description: "What Finance Book AI collects, why, who sees it, and how to download or delete your data." };
 
 export default function Privacy() {
   return (
-    <LegalLayout title="Privacy Policy" intro="Finance Book helps you keep track of your own money. This page explains, in plain words, what we collect, why, who it is shared with and how you stay in control.">
+    <LegalLayout title="Privacy Policy" intro="Finance Book AI helps you keep track of your own money. This page explains, in plain words, what we collect, why, who it is shared with and how you stay in control.">
       <section className="legal-short">
         <h2>The short version</h2>
         <ul>
@@ -44,7 +44,7 @@ export default function Privacy() {
       <p>We do not use your records for advertising, and we do not sell or rent them.</p>
 
       <h2>3. Who we share it with</h2>
-      <p>We use these service providers to operate Finance Book. They process data on our behalf and only to provide their service.</p>
+      <p>We use these service providers to operate Finance Book AI. They process data on our behalf and only to provide their service.</p>
       <div className="legal-table" role="table" aria-label="Service providers">
         <div role="row" className="lt-h"><span role="columnheader">Provider</span><span role="columnheader">What it does</span><span role="columnheader">Data involved</span></div>
         <div role="row"><span role="cell"><a href="https://supabase.com/privacy" target="_blank" rel="noreferrer">Supabase</a></span><span role="cell">Database and sign-in</span><span role="cell">Account details, your profile picture, receipts and all records you enter</span></div>
@@ -52,7 +52,7 @@ export default function Privacy() {
         <div role="row"><span role="cell"><a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">Google</a></span><span role="cell">“Sign in with Google”</span><span role="cell">Name, email, profile picture (only if you choose Google sign-in)</span></div>
         <div role="row"><span role="cell">AI provider (currently Google Gemini)</span><span role="cell">Writes Sam’s answers</span><span role="cell">Your question and the figures Sam looks up to answer it (see section 4)</span></div>
       </div>
-      <p>We may also disclose information if the law requires it, or to protect the safety and rights of our users and the service. If Finance Book is ever merged with or acquired by another business, we will tell you before your data is transferred and give you the choice to delete it.</p>
+      <p>We may also disclose information if the law requires it, or to protect the safety and rights of our users and the service. If Finance Book AI is ever merged with or acquired by another business, we will tell you before your data is transferred and give you the choice to delete it.</p>
 
       <h2>4. The Ask Sam assistant</h2>
       <ul>
@@ -85,7 +85,7 @@ export default function Privacy() {
       <p>Connections are encrypted with HTTPS. Every table is protected by row-level security in the database, so each signed-in user can read and change only their own rows. Passwords are hashed. No system is perfectly secure, so please use a strong, unique password and keep your devices updated. If we learn of a breach that affects you, we will tell you as the law requires.</p>
 
       <h2>10. Children</h2>
-      <p>Finance Book is meant for people aged 18 and over. We do not knowingly collect data from children. If you believe a child has created an account, tell us and we will delete it.</p>
+      <p>Finance Book AI is meant for people aged 18 and over. We do not knowingly collect data from children. If you believe a child has created an account, tell us and we will delete it.</p>
 
       <h2>11. Changes to this policy</h2>
       <p>If we make important changes, we will update the date at the top of this page and, where appropriate, tell you in the app or by email.</p>

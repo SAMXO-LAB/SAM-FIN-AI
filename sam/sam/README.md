@@ -1,4 +1,4 @@
-# Finance Book — personal finance, beautifully understood
+# Finance Book AI — personal finance, beautifully understood
 
 *Money, managed.* Your personal assistant inside the app is called **Sam**.
 
@@ -8,7 +8,7 @@ Next.js 15 (App Router) + Supabase (Postgres, Auth, Row Level Security). Amounts
 
 **Not built yet:** receipt scanner, assistant actions that change data (add/edit records), admin panel, investments, bills & subscriptions, reports, notification centre, global search.
 
-Finance Book never asks for bank logins, PINs or OTPs.
+Finance Book AI never asks for bank logins, PINs or OTPs.
 
 ## 1. Create a Supabase project
 1. Create a project at <https://supabase.com>.
@@ -21,11 +21,11 @@ Finance Book never asks for bank logins, PINs or OTPs.
 - Site URL: your public URL (`http://localhost:3000` locally)
 - Redirect URLs: add `http://localhost:3000/auth/callback` and `https://YOUR-DOMAIN/auth/callback`
 
-**Authentication → Providers → Email**: keep it enabled. "Confirm email" on is recommended for production; Finance Book handles both settings.
+**Authentication → Providers → Email**: keep it enabled. "Confirm email" on is recommended for production; Finance Book AI handles both settings.
 
 **Google sign-in**
 1. <https://console.cloud.google.com> → APIs & Services → Credentials → *Create credentials → OAuth client ID* → type *Web application*.
-2. Authorised redirect URI: `https://<your-project-ref>.supabase.co/auth/v1/callback` (this is Supabase's URL, not Finance Book's).
+2. Authorised redirect URI: `https://<your-project-ref>.supabase.co/auth/v1/callback` (this is Supabase's URL, not Finance Book AI's).
 3. Copy the Client ID and Client secret into **Supabase → Authentication → Providers → Google** and enable it.
 4. Configure the OAuth consent screen (app name, support email, authorised domain).
 
@@ -71,6 +71,12 @@ How it stays safe: the key is only used on the server; the route checks the sess
 ## 6. Legal pages
 `/privacy` and `/terms` are public pages (linked from the footer, sign-up and sign-in). They describe what the app actually does today (Supabase, Vercel, Google sign-in, an AI provider, no analytics). **If you change any of that (add analytics, change AI provider, store chats), update `src/app/privacy/page.tsx`.** Have a lawyer review both before you rely on them.
 Set `NEXT_PUBLIC_CONTACT_EMAIL` to show a contact address on both pages.
+
+## 7. Android app (Google Play)
+The site is an installable PWA (`/manifest.webmanifest`, `/sw.js`, offline page). To publish it on Google Play as a Trusted Web Activity,
+follow [`store/PLAY_STORE_GUIDE.md`](store/PLAY_STORE_GUIDE.md). Listing text, data-safety answers, icon, feature graphic and screenshots are in `store/`.
+Set `ANDROID_PACKAGE_NAME` and `ANDROID_SHA256_FINGERPRINTS` so `/.well-known/assetlinks.json` links the app to the site.
+`/delete-account` is the public account-deletion page Google requires.
 
 ## Security notes
 - Every table has RLS: a user can only read and write their own rows. Foreign keys are composite `(id, user_id)`, so a row cannot point at another user's data.

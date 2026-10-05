@@ -86,7 +86,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
       {setupLeft > 0 && (
         <section className="card g3" aria-label="Get set up">
-          <div className="card-head"><div><h3 className="h3">{sp.welcome ? `Welcome to Finance Book, ${first}` : "Finish setting up"}</h3><div className="sub">{4 - setupLeft} of 4 done. Your dashboard fills in as you go.</div></div></div>
+          <div className="card-head"><div><h3 className="h3">{sp.welcome ? `Welcome to Finance Book AI, ${first}` : "Finish setting up"}</h3><div className="sub">{4 - setupLeft} of 4 done. Your dashboard fills in as you go.</div></div></div>
           <div className="rows">
             {steps.map((s) => (
               <div className="row" key={s.label}>

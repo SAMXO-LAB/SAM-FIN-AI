@@ -57,7 +57,7 @@ export function DeleteAccount() {
   return (
     <>
       <button className="btn btn-danger btn-sm" onClick={() => setOpen(true)}><Trash2 size={15} />Delete</button>
-      <Dialog open={open} onClose={() => setOpen(false)} title="Delete your Finance Book account?">
+      <Dialog open={open} onClose={() => setOpen(false)} title="Delete your Finance Book AI account?">
         <InnerForm action={deleteMyAccount} submitLabel="Delete my account" danger onDone={() => setOpen(false)} onCancel={() => setOpen(false)}>
           {(s) => (
             <>

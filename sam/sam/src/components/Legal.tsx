@@ -16,7 +16,7 @@ export function LegalLayout({ title, intro, children }: { title: string; intro: 
   return (
     <div className="legal-page">
       <header className="wrap legal-top">
-        <Link href="/" aria-label="Finance Book home"><Brand /></Link>
+        <Link href="/" aria-label="Finance Book AI home"><Brand /></Link>
         <div className="legal-top-r">
           <ThemeToggle />
           <Link className="btn btn-glass btn-sm" href="/">Back to home</Link>
@@ -24,13 +24,13 @@ export function LegalLayout({ title, intro, children }: { title: string; intro: 
       </header>
       <main className="wrap legal-main">
         <article className="legal-doc g2">
-          <p className="eyebrow">Finance Book</p>
+          <p className="eyebrow">Finance Book AI</p>
           <h1 className="h2">{title}</h1>
           <p className="legal-meta">Last updated: {UPDATED}</p>
           <p className="lede">{intro}</p>
           {children}
           <nav className="legal-links" aria-label="Legal">
-            <Link href="/privacy">Privacy Policy</Link><Link href="/terms">Terms of Service</Link><Link href="/">Home</Link>
+            <Link href="/privacy">Privacy Policy</Link><Link href="/terms">Terms of Service</Link><Link href="/delete-account">Delete account</Link><Link href="/">Home</Link>
           </nav>
         </article>
       </main>
