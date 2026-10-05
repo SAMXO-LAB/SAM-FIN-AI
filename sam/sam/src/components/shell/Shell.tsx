@@ -12,12 +12,12 @@ import { TransactionButton } from "@/features/finance/forms";
 import { signOut } from "@/features/auth/actions";
 import type { AccountWithBalance, Category } from "@/types/db";
 import { NAV } from "./nav";
+import { Avatar, type AvatarInfo } from "@/components/avatar/Avatar";
 
 const ICONS = { Sparkles, LayoutDashboard, ArrowLeftRight, Wallet, Landmark, HandCoins, Handshake, ChartPie, Target, Settings } as const;
-const initials = (n: string) => n.trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase() || "?";
 
-export function Shell({ name, email, accounts, categories, children }: {
-  name: string; email: string; accounts: AccountWithBalance[]; categories: Category[]; children: React.ReactNode;
+export function Shell({ name, email, me, accounts, categories, children }: {
+  name: string; email: string; me: AvatarInfo; accounts: AccountWithBalance[]; categories: Category[]; children: React.ReactNode;
 }) {
   const path = usePathname();
   const [more, setMore] = useState(false);
@@ -36,7 +36,7 @@ export function Shell({ name, email, accounts, categories, children }: {
           </nav>
         ))}
         <div className="side-foot">
-          <span className="av" aria-hidden="true">{initials(name)}</span>
+          <Link href="/settings" className="av-link" aria-label="Your profile and settings"><Avatar user={me} size={38} /></Link>
           <div className="who"><b>{name}</b><span className="xs muted" style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email}</span></div>
           <form action={signOut}><button className="icon-btn" aria-label="Sign out" title="Sign out"><LogOut size={18} /></button></form>
         </div>
@@ -46,6 +46,7 @@ export function Shell({ name, email, accounts, categories, children }: {
           <Link href="/dashboard" className="mob-brand" aria-label="Finance Book dashboard"><Brand /></Link>
           <span className="sp" />
           <ThemeToggle />
+          <Link href="/settings" className="av-link show-mob" aria-label="Your profile and settings"><Avatar user={me} size={34} /></Link>
           <span className="hide-mob">
             <TransactionButton accounts={accounts} categories={categories} trigger={<><Plus size={16} />Add transaction</>} />
           </span>

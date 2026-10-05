@@ -26,8 +26,11 @@ export const newPasswordSchema = z.object({
   confirm: z.string(),
 }).refine((d) => d.password === d.confirm, { path: ["confirm"], message: "Passwords don’t match." });
 
+export const genderSchema = z.enum(["male", "female", "unspecified"]).catch("unspecified");
+
 export const onboardingSchema = z.object({
   full_name: z.string().trim().min(1, "Enter your name.").max(80),
+  gender: genderSchema,
   currency: z.enum(["INR", "USD", "EUR", "GBP", "AED", "SGD"]),
   country: optText(60),
   income_range: optText(40),

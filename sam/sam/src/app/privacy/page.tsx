@@ -20,7 +20,9 @@ export default function Privacy() {
       <h3>Account details</h3>
       <p>Your name and email address, and a password if you sign up with email. Passwords are never stored in readable form; they are hashed by our authentication provider.</p>
       <h3>If you sign in with Google</h3>
-      <p>Google tells us your name, email address and profile picture, and that is all. We use them only to create and recognise your account. We do not ask for access to your Gmail, contacts, Drive, calendar or any other Google data.</p>
+      <p>Google tells us your name and email address, and it also passes along your Google profile picture address. We use the name and email only to create and recognise your account, and we do not display or copy your Google picture. We do not ask for access to your Gmail, contacts, Drive, calendar or any other Google data.</p>
+      <h3>Profile picture and gender (optional)</h3>
+<p>You can choose a built-in picture or upload your own photo, and you can say whether you are male, female or prefer not to say. Gender is used only to choose a default picture. A photo is cropped and resized on your own device, then stored in your account in our database. It is shown only to you and is deleted when you remove it or delete your account. Please do not upload photos of other people.</p>
       <h3>Money records you enter</h3>
       <p>Accounts (by name and balance), transactions, categories, loans and EMIs, money you have lent or borrowed, budgets and savings goals, and your settings such as currency and theme. You choose what to enter. We do not read your bank statements or messages.</p>
       <h3>Questions you ask Sam</h3>
@@ -43,7 +45,7 @@ export default function Privacy() {
       <p>We use these service providers to operate Finance Book. They process data on our behalf and only to provide their service.</p>
       <div className="legal-table" role="table" aria-label="Service providers">
         <div role="row" className="lt-h"><span role="columnheader">Provider</span><span role="columnheader">What it does</span><span role="columnheader">Data involved</span></div>
-        <div role="row"><span role="cell"><a href="https://supabase.com/privacy" target="_blank" rel="noreferrer">Supabase</a></span><span role="cell">Database and sign-in</span><span role="cell">Account details and all records you enter</span></div>
+        <div role="row"><span role="cell"><a href="https://supabase.com/privacy" target="_blank" rel="noreferrer">Supabase</a></span><span role="cell">Database and sign-in</span><span role="cell">Account details, your profile picture and all records you enter</span></div>
         <div role="row"><span role="cell"><a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noreferrer">Vercel</a></span><span role="cell">Website hosting</span><span role="cell">Requests to the site, IP address, logs</span></div>
         <div role="row"><span role="cell"><a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">Google</a></span><span role="cell">“Sign in with Google”</span><span role="cell">Name, email, profile picture (only if you choose Google sign-in)</span></div>
         <div role="row"><span role="cell">AI provider (currently Google Gemini)</span><span role="cell">Writes Sam’s answers</span><span role="cell">Your question and the figures Sam looks up to answer it (see section 4)</span></div>

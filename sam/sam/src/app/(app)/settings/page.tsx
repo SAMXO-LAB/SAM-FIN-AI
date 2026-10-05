@@ -14,7 +14,7 @@ export default async function SettingsPage() {
     <>
       <PageHead eyebrow="Preferences" title="Settings" />
       <div className="grid">
-        <section className="card g2 s6"><div className="card-head"><h2 className="h3">Profile</h2></div><ProfileForm profile={profile} /></section>
+        <section className="card g2 s6"><div className="card-head"><h2 className="h3">Profile</h2></div><ProfileForm profile={profile} me={{ id: user.id, name: profile.full_name || user.email || "You", gender: profile.gender, avatar_kind: profile.avatar_kind, avatar_key: profile.avatar_key, avatar_updated_at: profile.avatar_updated_at }} /></section>
         <section className="card g2 s6">
           <div className="card-head"><h2 className="h3">Sign-in &amp; security</h2></div>
           <div className="set-row"><div><b>Email</b><span>{user.email}</span></div><span className={`pill ${user.email_confirmed_at ? "pos" : "warn"}`}>{user.email_confirmed_at ? "Verified" : "Unverified"}</span></div>

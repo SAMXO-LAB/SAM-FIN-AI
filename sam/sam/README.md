@@ -4,7 +4,7 @@
 
 Next.js 15 (App Router) + Supabase (Postgres, Auth, Row Level Security). Amounts are stored as integer paise, so there is no floating-point money. Default currency is INR.
 
-**Built:** Ask Sam (AI assistant, read-only), sign up / sign in (email + password, Google), email confirmation, password reset, onboarding, dashboard, accounts, transactions (income, expense, transfer, search, filters, CSV export), EMIs & loans with amortisation schedules, money lent and borrowed with repayments, budgets, savings goals, light/dark/system themes, account deletion.
+**Built:** profile pictures (own photo or built-in avatars, chosen by gender), Ask Sam (AI assistant, read-only), sign up / sign in (email + password, Google), email confirmation, password reset, onboarding, dashboard, accounts, transactions (income, expense, transfer, search, filters, CSV export), EMIs & loans with amortisation schedules, money lent and borrowed with repayments, budgets, savings goals, light/dark/system themes, account deletion.
 
 **Not built yet:** receipt scanner, assistant actions that change data (add/edit records), admin panel, investments, bills & subscriptions, reports, notification centre, global search.
 
@@ -13,7 +13,7 @@ Finance Book never asks for bank logins, PINs or OTPs.
 ## 1. Create a Supabase project
 1. Create a project at <https://supabase.com>.
 2. **SQL Editor** → paste `supabase/migrations/20261004000000_init.sql` → Run. This creates every table, the RLS policies, triggers and the `delete_my_account()` function.
-3. Also run `supabase/migrations/20261004100000_assistant.sql` (the AI assistant's daily message limit).
+3. Also run `supabase/migrations/20261004100000_assistant.sql` (the AI assistant's daily message limit) and `supabase/migrations/20261005100000_profile_picture.sql` (profile picture and gender). The app keeps working if you forget the second one, but pictures and gender are not saved until it has run.
 4. **Project settings → API**: copy the Project URL and the `anon` public key.
 
 ## 2. Configure auth

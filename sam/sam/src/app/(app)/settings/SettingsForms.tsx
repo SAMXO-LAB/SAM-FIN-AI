@@ -6,6 +6,8 @@ import { Dialog } from "@/components/ui/Dialog";
 import { useToast } from "@/components/ui/Toast";
 import { CURRENCIES } from "@/lib/labels";
 import { deleteMyAccount, updatePrefs, updateProfile } from "@/features/profile/actions";
+import { AvatarPicker } from "@/features/profile/AvatarPicker";
+import type { AvatarInfo } from "@/components/avatar/Avatar";
 import type { ActionState, Profile } from "@/types/db";
 
 function useToastOn(state: ActionState) {
@@ -13,11 +15,12 @@ function useToastOn(state: ActionState) {
   useEffect(() => { if (state.ok && state.message) toast(state.message); }, [state, toast]);
 }
 
-export function ProfileForm({ profile }: { profile: Profile }) {
+export function ProfileForm({ profile, me }: { profile: Profile; me: AvatarInfo }) {
   const [state, action] = useActionState(updateProfile, {});
   useToastOn(state);
   return (
     <form action={action} className="form-grid" noValidate>
+      <AvatarPicker key={`${me.avatar_kind}-${me.avatar_key}-${me.avatar_updated_at}-${me.gender}`} me={me} />
       <div className="field full"><label htmlFor="pf-name">Name</label><input className="input" id="pf-name" name="full_name" defaultValue={profile.full_name ?? ""} maxLength={80} /><FieldError state={state} name="full_name" /></div>
       <div className="field"><label htmlFor="pf-cur">Default currency</label><select className="select" id="pf-cur" name="currency" defaultValue={profile.currency}>{CURRENCIES.map((c) => <option key={c}>{c}</option>)}</select></div>
       <div className="field"><label htmlFor="pf-country">Country</label><input className="input" id="pf-country" name="country" defaultValue={profile.country ?? ""} maxLength={60} /></div>

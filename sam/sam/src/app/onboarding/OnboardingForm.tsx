@@ -13,6 +13,7 @@ export function OnboardingForm({ name }: { name: string }) {
   const [state, action] = useActionState(saveOnboarding, {});
   const [step, setStep] = useState(0);
   const [nm, setNm] = useState(name);
+  const [gender, setGender] = useState("unspecified");
   return (
     <form action={action} className="sheet g4" style={{ width: "min(560px,100%)" }} noValidate>
       <div className="sheet-head">
@@ -26,6 +27,16 @@ export function OnboardingForm({ name }: { name: string }) {
 
       <div style={{ display: step === 0 ? "grid" : "none", gap: 14 }}>
         <div className="field"><label htmlFor="ob-name">What should we call you?</label><input className="input" id="ob-name" name="full_name" value={nm} onChange={(e) => setNm(e.target.value)} maxLength={80} autoFocus required /></div>
+        <div className="field">
+          <span className="lbl" id="ob-gender">Gender (optional)</span>
+          <input type="hidden" name="gender" value={gender} />
+          <div className="seg full" role="radiogroup" aria-labelledby="ob-gender">
+            {([["male", "Male"], ["female", "Female"], ["unspecified", "Prefer not to say"]] as const).map(([g, l]) => (
+              <button key={g} type="button" role="radio" aria-checked={gender === g} className={gender === g ? "on" : ""} onClick={() => setGender(g)}>{l}</button>
+            ))}
+          </div>
+          <span className="hint">Used to pick your starting profile picture. You can upload your own photo later in Settings.</span>
+        </div>
         <div className="form-grid">
           <div className="field"><label htmlFor="ob-cur">Currency</label><select className="select" id="ob-cur" name="currency" defaultValue="INR">{["INR", "USD", "EUR", "GBP", "AED", "SGD"].map((c) => <option key={c}>{c}</option>)}</select></div>
           <div className="field"><label htmlFor="ob-country">Country</label><input className="input" id="ob-country" name="country" defaultValue="India" maxLength={60} /></div>

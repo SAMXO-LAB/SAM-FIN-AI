@@ -835,3 +835,19 @@ section[aria-label="Get set up"] .row .t{white-space:normal;overflow:visible;tex
 .legal-table .lt-h{background:var(--hover);font-weight:600;color:var(--ink);font-size:12.5px;letter-spacing:.02em}
 .legal-links{display:flex;gap:18px;flex-wrap:wrap;margin-top:30px;padding-top:20px;border-top:1px solid var(--line);font-size:14px}
 @media (max-width:640px){.legal-table>div{grid-template-columns:1fr;gap:2px}.legal-table .lt-h{display:none}.legal-table>div>span:first-child{font-weight:600;color:var(--ink)}}
+
+/* Profile picture */
+.avatar-img{border-radius:50%;object-fit:cover;display:block;background:var(--hover)}
+.av-link{display:block;border-radius:50%;flex:none;line-height:0;outline-offset:2px}
+.av-link svg,.av-link img{box-shadow:0 0 0 1px var(--line)}
+.avp{display:grid;gap:18px}
+.avp-top{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.avp-big{width:96px;height:96px;border-radius:50%;overflow:hidden;flex:none;box-shadow:0 0 0 1px var(--line),var(--sh-2)}
+.avp-actions{display:grid;gap:6px;min-width:0;flex:1 1 220px}
+.avp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:10px}
+.avp-opt{width:56px;height:56px;padding:2px;border-radius:50%;border:2px solid transparent;background:none;cursor:pointer;transition:transform .2s var(--spring),border-color .2s}
+.avp-opt:hover{transform:scale(1.07)}
+.avp-opt.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.avp-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.avp-opt{transition:none}.avp-opt:hover{transform:none}}
+.av-link.show-mob{display:none}

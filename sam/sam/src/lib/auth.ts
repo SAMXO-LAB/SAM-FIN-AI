@@ -12,10 +12,20 @@ export const requireUser = cache(async () => {
   return { supabase, user };
 });
 
+// Everything except avatar_data (the photo itself), which is served by /api/avatar and would bloat every page.
+const PROFILE_COLS = "id, full_name, currency, country, income_range, goals, notify_emi, notify_bills, notify_lent, notify_budget, onboarded, gender, avatar_kind, avatar_key, avatar_updated_at";
+
+const BASE_COLS = "id, full_name, currency, country, income_range, goals, notify_emi, notify_bills, notify_lent, notify_budget, onboarded";
+
 export const getProfile = cache(async (): Promise<Profile | null> => {
   const { supabase, user } = await requireUser();
-  const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
-  return (data as Profile) ?? null;
+  let { data, error } = await supabase.from("profiles").select(PROFILE_COLS).eq("id", user.id).maybeSingle();
+  if (error) {
+    // The picture/gender migration has not been run yet: keep the app working with defaults.
+    ({ data } = await supabase.from("profiles").select(BASE_COLS).eq("id", user.id).maybeSingle());
+    if (data) data = { ...data, gender: "unspecified", avatar_kind: "default", avatar_key: null, avatar_updated_at: null };
+  }
+  return (data as Profile | null) ?? null;
 });
 
 export function siteUrl() {
