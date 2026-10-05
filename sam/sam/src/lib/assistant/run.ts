@@ -1,7 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { TOOLS, runTool } from "./tools";
-import { aiConfig, type AiConfig } from "./config";
+import { aiChain, type AiConfig } from "./config";
 
 export type Ev =
   | { t: "text"; d: string }
@@ -20,9 +20,26 @@ const codeFor = (status?: number, body = ""): "busy" | "config" | "failed" =>
 
 /** Runs the tool-using conversation and yields events for the browser. Nothing from the user's data is logged. */
 export async function* runAssistant(opts: Opts): AsyncGenerator<Ev> {
-  const cfg = aiConfig();
-  if (!cfg) { yield { t: "error", code: "config" }; return; }
-  yield* cfg.provider === "anthropic" ? runAnthropic(cfg, opts) : runOpenAICompatible(cfg, opts);
+  const chain = aiChain();
+  if (!chain.length) { yield { t: "error", code: "config" }; return; }
+  const codes: ("busy" | "config" | "failed")[] = [];
+  for (let i = 0; i < chain.length; i++) {
+    const cfg = { ...chain[i], retry: i === chain.length - 1 }; // only the last candidate waits and retries
+    let spoke = false, failed: "busy" | "config" | "failed" | null = null;
+    for await (const ev of cfg.provider === "anthropic" ? runAnthropic(cfg, opts) : runOpenAICompatible(cfg, opts)) {
+      if (ev.t === "error") { failed = ev.code; break; }
+      if (ev.t === "text") spoke = true;
+      yield ev;
+    }
+    if (!failed) return;
+    // Once an answer has started streaming we cannot switch; otherwise quietly try the next model.
+    if (spoke || i === chain.length - 1 || opts.signal?.aborted) {
+      codes.push(failed);
+      yield { t: "error", code: codes.includes("busy") ? "busy" : codes[0] };
+      return;
+    }
+    codes.push(failed);
+  }
 }
 
 async function* runAnthropic(cfg: AiConfig, opts: Opts): AsyncGenerator<Ev> {
@@ -101,7 +118,7 @@ async function post(cfg: AiConfig, body: unknown, signal?: AbortSignal): Promise
     });
     if (res.ok) return res;
     const text = await res.text().catch(() => "");
-    if (attempt === 0 && (res.status === 429 || res.status === 503)) { await sleep(1500); continue; }
+    if (attempt === 0 && cfg.retry !== false && (res.status === 429 || res.status === 503)) { await sleep(1500); continue; }
     throw Object.assign(new Error("provider error"), { status: res.status, body: text.slice(0, 300) });
   }
 }
@@ -140,7 +157,7 @@ async function* runOpenAICompatible(cfg: AiConfig, opts: Opts): AsyncGenerator<E
           if (!c && !tc.id) c = tc.index != null ? calls[tc.index] : calls[calls.length - 1];
           // a name arriving for a slot that already has one means a new call (providers differ on indexes)
           if (c && tc.function?.name && c.name && c.name !== "" && !tc.id) c = undefined;
-          if (!c) { c = { id: tc.id || `call_${round}_${calls.length}`, name: "", args: "" }; calls.push(c); }
+          if (!c) { c = { id: tc.id || `c${round}i${calls.length}xxxxxxxxx`.slice(0, 9), name: "", args: "" }; calls.push(c); }
           if (tc.function?.name) c.name = tc.function.name;
           if (tc.function?.arguments) c.args += tc.function.arguments;
           if (tc.extra_content) c.extra = tc.extra_content;

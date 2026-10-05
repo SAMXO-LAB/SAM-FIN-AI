@@ -51,13 +51,20 @@ Sam answers questions about the signed-in user's own data (balances, spending, l
 
 Other providers (set the matching key; or set `AI_PROVIDER` and `AI_API_KEY` explicitly):
 
-| Provider | Key variable | Default model |
-|---|---|---|
-| Google Gemini (free tier) | `GEMINI_API_KEY` | `gemini-3.8-flash` |
-| Groq (free tier) | `GROQ_API_KEY` | `llama-3.3-70b-versatile` |
-| Anthropic Claude (paid) | `ANTHROPIC_API_KEY` | `claude-sonnet-5-5` |
+| Provider | Key variable | Default model | Free tier |
+|---|---|---|---|
+| Google Gemini | `GEMINI_API_KEY` | `gemini-3.8-flash` | yes |
+| Groq | `GROQ_API_KEY` | `llama-3.3-70b-versatile` | yes |
+| Cerebras | `CEREBRAS_API_KEY` | `gpt-oss-120b` | yes (small limits) |
+| OpenRouter | `OPENROUTER_API_KEY` | `meta-llama/llama-3.3-70b-instruct:free` | yes (about 50 requests/day without credits) |
+| Mistral | `MISTRAL_API_KEY` | `mistral-small-latest` | yes (restrictive) |
+| Anthropic Claude | `ANTHROPIC_API_KEY` | `claude-sonnet-5-5` | no |
 
-Optional: `AI_MODEL` (e.g. `gemini-3.5-flash-lite` if you hit free-tier limits), `ASSISTANT_DAILY_LIMIT` (messages per user per day, default 40). Model names and free quotas change; check the provider's pricing page. Free tiers may allow the provider to use prompts to improve their products. Use a paid key before real users rely on it.
+Override any model with `<PROVIDER>_MODEL` (for example `OPENROUTER_MODEL`). Free model names change often; if one is retired Sam just skips to the next.
+
+**Automatic fallback.** Free tiers have limits and sometimes run busy. Sam tries the next option automatically: several Gemini models first (`gemini-3.8-flash`, `gemini-3.5-flash`, `gemini-3.5-flash-lite`; free quotas are counted per model), then every other provider whose key you have set, in the order of the table above. Adding a second free key (Groq, Cerebras or OpenRouter) alongside `GEMINI_API_KEY` is the easiest way to get more headroom. Only if all of them are busy does the user see "Sam is busy".
+
+Optional: `AI_FALLBACK_MODELS` (comma-separated models to try after `AI_MODEL`), `AI_MODEL` (e.g. `gemini-3.5-flash-lite` if you hit free-tier limits), `ASSISTANT_DAILY_LIMIT` (messages per user per day, default 40). Model names and free quotas change; check the provider's pricing page. Free tiers may allow the provider to use prompts to improve their products. Use a paid key before real users rely on it.
 
 How it stays safe: the key is only used on the server; the route checks the session and same-origin; tools run as the signed-in user so RLS applies; tool results are passed to the model as untrusted data; each user is limited to a daily message count.
 
