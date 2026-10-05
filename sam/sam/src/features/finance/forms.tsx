@@ -2,6 +2,7 @@
 import { useMemo, useState } from "react";
 import { FieldError, FormDialog } from "@/components/ui/Form";
 import { Icon } from "@/components/Icon";
+import { ReceiptField } from "./ReceiptField";
 import { amortise, goalPlan } from "@/lib/finance";
 import { formatINR, paiseToInput, toPaise } from "@/lib/money";
 import { addMonths, iso, today } from "@/lib/dates";
@@ -15,15 +16,15 @@ type Trig = { trigger: React.ReactNode; triggerClass?: string; label?: string };
 const inv = (s: ActionState, k: string) => (s.fields?.[k] ? true : undefined);
 
 /* ─── transaction ─── */
-export function TransactionButton({ accounts, categories, tx, ...t }: Trig & { accounts: AccountWithBalance[]; categories: Category[]; tx?: Transaction }) {
+export function TransactionButton({ accounts, categories, tx, receipts, ...t }: Trig & { accounts: AccountWithBalance[]; categories: Category[]; tx?: Transaction; receipts?: string[] }) {
   return (
     <FormDialog {...t} title={tx ? "Edit transaction" : "New transaction"} action={saveTransaction} submitLabel={tx ? "Save changes" : "Add transaction"}>
-      {(s) => <TxFields s={s} accounts={accounts} categories={categories} tx={tx} />}
+      {(s) => <TxFields s={s} accounts={accounts} categories={categories} tx={tx} receipts={receipts} />}
     </FormDialog>
   );
 }
 
-function TxFields({ s, accounts, categories, tx }: { s: ActionState; accounts: AccountWithBalance[]; categories: Category[]; tx?: Transaction }) {
+function TxFields({ s, accounts, categories, tx, receipts }: { s: ActionState; accounts: AccountWithBalance[]; categories: Category[]; tx?: Transaction; receipts?: string[] }) {
   const [type, setType] = useState<"expense" | "income" | "transfer">(tx?.type ?? "expense");
   const cats = categories.filter((c) => c.kind === (type === "income" ? "income" : "expense") && c.name !== "EMI");
   const defCat = tx?.category_id && cats.some((c) => c.id === tx.category_id) ? tx.category_id : cats[0]?.id;
@@ -67,6 +68,7 @@ function TxFields({ s, accounts, categories, tx }: { s: ActionState; accounts: A
         <div className="field"><label htmlFor="t-date">Date</label><input className="input" type="date" id="t-date" name="occurred_on" defaultValue={tx?.occurred_on ?? iso(today())} required /><FieldError state={s} name="occurred_on" /></div>
         <div className="field"><label htmlFor="t-desc">Description</label><input className="input" id="t-desc" name="description" defaultValue={tx?.description ?? ""} maxLength={120} placeholder="Optional" /></div>
         <div className="field full"><label htmlFor="t-notes">Notes</label><textarea className="input" id="t-notes" name="notes" defaultValue={tx?.notes ?? ""} maxLength={500} placeholder="Optional" /></div>
+        <ReceiptField existing={receipts} />
       </div>
     </>
   );

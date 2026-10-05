@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth";
 import { loanSummary } from "@/lib/finance";
 import { iso, today } from "@/lib/dates";
+import { MAX_RECEIPT_CHARS, parsePhoto } from "@/lib/avatar";
 import { formatINR } from "@/lib/money";
 import {
   accountSchema, budgetSchema, contributionSchema, debtSchema, fieldErrors, goalSchema, idSchema, loanSchema,
@@ -30,9 +31,38 @@ export async function saveTransaction(_: ActionState, fd: FormData): Promise<Act
     : { type: d.type, amount: d.amount, occurred_on: d.occurred_on, account_id: d.account_id, category_id: d.category_id, from_account_id: null, to_account_id: null, counterparty: d.counterparty, payment_method: d.payment_method, description: d.description, notes: d.notes };
   const { supabase } = await requireUser();
   const id = String(fd.get("id") || "");
-  const { error } = id ? await supabase.from("transactions").update(row).eq("id", id) : await supabase.from("transactions").insert(row);
-  if (error) return fail(id ? "update the transaction" : "add the transaction", error);
-  return ok(id ? "Transaction updated" : `${d.type === "income" ? "Income" : d.type === "expense" ? "Expense" : "Transfer"} of ${formatINR(d.amount)} added`);
+  let txId = id;
+  if (id) {
+    const { error } = await supabase.from("transactions").update(row).eq("id", id);
+    if (error) return fail("update the transaction", error);
+  } else {
+    const { data, error } = await supabase.from("transactions").insert(row).select("id").single();
+    if (error || !data) return fail("add the transaction", error ?? undefined);
+    txId = data.id as string;
+  }
+  const lost = await saveReceipts(supabase, txId, fd);
+  const base = id ? "Transaction updated" : `${d.type === "income" ? "Income" : d.type === "expense" ? "Expense" : "Transfer"} of ${formatINR(d.amount)} added`;
+  return ok(lost ? `${base}, but ${lost}` : base);
+}
+
+/** Optional receipts: removes the ones the user ticked off and adds new ones. Returns a short problem message, or "". */
+async function saveReceipts(supabase: Awaited<ReturnType<typeof requireUser>>["supabase"], txId: string, fd: FormData): Promise<string> {
+  const remove = fd.getAll("receipt_remove").map(String).filter((v) => /^[0-9a-f-]{36}$/.test(v));
+  const fresh = fd.getAll("receipt_new").map(String).filter(Boolean);
+  if (!remove.length && !fresh.length) return "";
+  if (remove.length) {
+    const { error } = await supabase.from("transaction_receipts").delete().in("id", remove).eq("transaction_id", txId);
+    if (error) return "your receipt changes couldn’t be saved.";
+  }
+  if (!fresh.length) return "";
+  const photos = fresh.slice(0, 3).map((u) => parsePhoto(u, MAX_RECEIPT_CHARS));
+  const good = photos.filter((p): p is NonNullable<typeof p> => !!p);
+  let problem = good.length < fresh.length ? "some images couldn’t be used (JPG, PNG or WebP, up to 3 per transaction)." : "";
+  for (const p of good) {
+    const { error } = await supabase.from("transaction_receipts").insert({ transaction_id: txId, mime: p.mime, data: p.base64 });
+    if (error) { problem = error.message?.includes("receipt_limit") ? "the receipt limit was reached (3 per transaction)." : "your receipts couldn’t be saved."; break; }
+  }
+  return problem;
 }
 
 export async function deleteTransaction(_: ActionState, fd: FormData): Promise<ActionState> {

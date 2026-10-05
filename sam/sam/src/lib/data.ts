@@ -79,3 +79,13 @@ export const getGoals = cache(async (): Promise<(Goal & { saved: number; contrib
     return { ...g, target: Number(g.target), contributions, saved: contributions.reduce((s, c) => s + c.amount, 0) };
   });
 });
+
+/** Receipt image ids per transaction (never the images themselves). Empty if the receipts migration has not been run. */
+export async function getReceiptIds(): Promise<Record<string, string[]>> {
+  const { supabase } = await requireUser();
+  const { data, error } = await supabase.from("transaction_receipts").select("id, transaction_id").order("created_at");
+  if (error) return {};
+  const out: Record<string, string[]> = {};
+  for (const r of data ?? []) (out[r.transaction_id as string] ??= []).push(r.id as string);
+  return out;
+}

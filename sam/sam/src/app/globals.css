@@ -851,3 +851,16 @@ section[aria-label="Get set up"] .row .t{white-space:normal;overflow:visible;tex
 .avp-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.avp-opt{transition:none}.avp-opt:hover{transform:none}}
 .av-link.show-mob{display:none}
+
+/* Receipts */
+.rcp-row{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch}
+.rcp-thumb{position:relative;width:78px;height:78px;border-radius:14px;overflow:hidden;background:var(--hover);box-shadow:0 0 0 1px var(--line);display:block;flex:none}
+.rcp-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.rcp-thumb.big{width:104px;height:104px}
+.rcp-x{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.62);color:#fff;border:0;cursor:pointer}
+.rcp-x:hover{background:rgba(0,0,0,.82)}
+.rcp-add{width:78px;height:78px;border-radius:14px;border:1.5px dashed var(--line-strong);display:grid;place-items:center;align-content:center;gap:4px;color:var(--ink-2);font-size:11.5px;font-weight:560;cursor:pointer;text-align:center;transition:background .2s,border-color .2s;flex:none}
+.rcp-add:hover,.rcp-add:focus-within{background:var(--hover);border-color:var(--accent);color:var(--ink)}
+.rcp-add.busy{opacity:.6;pointer-events:none}
+.rcp-clip{display:inline-block;vertical-align:-1px;margin-left:6px;color:var(--ink-3)}
+.rcp-view{display:grid;gap:8px;margin-top:14px}

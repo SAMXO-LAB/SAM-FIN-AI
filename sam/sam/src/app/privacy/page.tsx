@@ -25,6 +25,8 @@ export default function Privacy() {
 <p>You can choose a built-in picture or upload your own photo, and you can say whether you are male, female or prefer not to say. Gender is used only to choose a default picture. A photo is cropped and resized on your own device, then stored in your account in our database. It is shown only to you and is deleted when you remove it or delete your account. Please do not upload photos of other people.</p>
       <h3>Money records you enter</h3>
       <p>Accounts (by name and balance), transactions, categories, loans and EMIs, money you have lent or borrowed, budgets and savings goals, and your settings such as currency and theme. You choose what to enter. We do not read your bank statements or messages.</p>
+      <h3>Receipts and photos (optional)</h3>
+      <p>When you add or edit a transaction you may attach up to three receipt or photo images. They are shrunk on your device, stored in your account in our database and shown only to you. They are deleted when you remove them, delete the transaction or delete your account. They are not included in the JSON backup, but you can open and save each one from its transaction. Please cover card numbers, OTPs and other people’s personal details before uploading.</p>
       <h3>Questions you ask Sam</h3>
       <p>See section 4 for exactly what is sent when you use the Ask Sam assistant.</p>
       <h3>Technical data</h3>
@@ -45,7 +47,7 @@ export default function Privacy() {
       <p>We use these service providers to operate Finance Book. They process data on our behalf and only to provide their service.</p>
       <div className="legal-table" role="table" aria-label="Service providers">
         <div role="row" className="lt-h"><span role="columnheader">Provider</span><span role="columnheader">What it does</span><span role="columnheader">Data involved</span></div>
-        <div role="row"><span role="cell"><a href="https://supabase.com/privacy" target="_blank" rel="noreferrer">Supabase</a></span><span role="cell">Database and sign-in</span><span role="cell">Account details, your profile picture and all records you enter</span></div>
+        <div role="row"><span role="cell"><a href="https://supabase.com/privacy" target="_blank" rel="noreferrer">Supabase</a></span><span role="cell">Database and sign-in</span><span role="cell">Account details, your profile picture, receipts and all records you enter</span></div>
         <div role="row"><span role="cell"><a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noreferrer">Vercel</a></span><span role="cell">Website hosting</span><span role="cell">Requests to the site, IP address, logs</span></div>
         <div role="row"><span role="cell"><a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">Google</a></span><span role="cell">“Sign in with Google”</span><span role="cell">Name, email, profile picture (only if you choose Google sign-in)</span></div>
         <div role="row"><span role="cell">AI provider (currently Google Gemini)</span><span role="cell">Writes Sam’s answers</span><span role="cell">Your question and the figures Sam looks up to answer it (see section 4)</span></div>

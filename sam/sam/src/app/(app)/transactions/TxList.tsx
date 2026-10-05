@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeftRight, ChevronLeft, ChevronRight, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeftRight, ChevronLeft, ChevronRight, Paperclip, Pencil, Trash2 } from "lucide-react";
 import { Icon } from "@/components/Icon";
 import { Dialog } from "@/components/ui/Dialog";
 import { ConfirmButton } from "@/components/ui/Form";
@@ -13,7 +13,7 @@ import { TransactionButton } from "@/features/finance/forms";
 import { deleteTransaction } from "@/features/finance/actions";
 import type { AccountWithBalance, Category, Transaction } from "@/types/db";
 
-export function TxList({ rows, accounts, categories, page, pages }: { rows: Transaction[]; accounts: AccountWithBalance[]; categories: Category[]; page: number; pages: number }) {
+export function TxList({ rows, accounts, categories, receipts, page, pages }: { rows: Transaction[]; accounts: AccountWithBalance[]; categories: Category[]; receipts: Record<string, string[]>; page: number; pages: number }) {
   const [open, setOpen] = useState<Transaction | null>(null);
   const sp = useSearchParams();
   const acc = (id: string | null) => accounts.find((a) => a.id === id)?.name ?? "Deleted account";
@@ -32,7 +32,7 @@ export function TxList({ rows, accounts, categories, page, pages }: { rows: Tran
           <tbody>{rows.map((t) => (
             <tr key={t.id} tabIndex={0} onClick={() => setOpen(t)} onKeyDown={(e) => e.key === "Enter" && setOpen(t)}>
               <td className="muted num">{fmtDate(t.occurred_on)}</td>
-              <td><div className="cell"><span className="ic">{icon(t)}</span><div><b>{title(t)}</b>{t.counterparty && t.description && <span>{t.counterparty}</span>}</div></div></td>
+              <td><div className="cell"><span className="ic">{icon(t)}</span><div><b>{title(t)}{receipts[t.id]?.length ? <Paperclip size={13} className="rcp-clip" aria-label="Has a receipt" /> : null}</b>{t.counterparty && t.description && <span>{t.counterparty}</span>}</div></div></td>
               <td>{t.type === "transfer" ? <span className="muted">Transfer</span> : cat(t.category_id)?.name ?? "—"}</td>
               <td className="muted">{where(t)}</td>
               <td className="muted">{methodLabel(t.payment_method)}</td>
@@ -47,7 +47,7 @@ export function TxList({ rows, accounts, categories, page, pages }: { rows: Tran
           <div key={t.id}>
             {sep && <div className="date-sep"><span>{fmtDate(t.occurred_on, { weekday: "short", day: "numeric", month: "short" })}</span></div>}
             <button className="row click" style={{ width: "100%", textAlign: "left" }} onClick={() => setOpen(t)}>
-              <span className="ic">{icon(t)}</span><div className="bd"><div className="t">{title(t)}</div><div className="s">{t.type === "transfer" ? where(t) : `${cat(t.category_id)?.name ?? "—"} · ${where(t)}`}</div></div><div className="amt">{amt(t)}</div>
+              <span className="ic">{icon(t)}</span><div className="bd"><div className="t">{title(t)}{receipts[t.id]?.length ? <Paperclip size={13} className="rcp-clip" aria-label="Has a receipt" /> : null}</div><div className="s">{t.type === "transfer" ? where(t) : `${cat(t.category_id)?.name ?? "—"} · ${where(t)}`}</div></div><div className="amt">{amt(t)}</div>
             </button>
           </div>
         );
@@ -75,10 +75,23 @@ export function TxList({ rows, accounts, categories, page, pages }: { rows: Tran
               {open.counterparty && <div><span className="k">{open.type === "income" ? "From" : "Merchant"}</span><span className="v">{open.counterparty}</span></div>}
               {open.notes && <div><span className="k">Notes</span><span className="v">{open.notes}</span></div>}
             </div>
+            {receipts[open.id]?.length ? (
+              <div className="rcp-view">
+                <span className="lbl">Receipts</span>
+                <div className="rcp-row">
+                  {receipts[open.id].map((id, i) => (
+                    <a key={id} className="rcp-thumb big" href={`/api/receipts/${id}`} target="_blank" rel="noreferrer" aria-label={`Open receipt ${i + 1} in a new tab`}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={`/api/receipts/${id}`} alt={`Receipt ${i + 1}`} loading="lazy" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             <div className="sheet-foot">
               <ConfirmButton action={deleteTransaction} id={open.id} title="Delete this transaction?" body={`${title(open)}, ${formatINR(open.amount)} on ${fmtDate(open.occurred_on)}. Account balances will update. This can’t be undone.`} trigger={<><Trash2 size={16} />Delete</>} triggerClass="btn btn-ghost" onDone={() => setOpen(null)} />
               <span style={{ flex: 1 }} />
-              <TransactionButton accounts={accounts} categories={categories} tx={open} trigger={<><Pencil size={16} />Edit</>} />
+              <TransactionButton accounts={accounts} categories={categories} tx={open} receipts={receipts[open.id] ?? []} trigger={<><Pencil size={16} />Edit</>} />
             </div>
           </>
         )}

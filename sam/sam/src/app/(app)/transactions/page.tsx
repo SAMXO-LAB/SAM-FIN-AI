@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Download, Plus, ReceiptText, SearchX } from "lucide-react";
 import { requireUser } from "@/lib/auth";
-import { getAccounts, getCategories } from "@/lib/data";
+import { getAccounts, getCategories, getReceiptIds } from "@/lib/data";
 import { addDays, iso, today } from "@/lib/dates";
 import { formatINR } from "@/lib/money";
 import { Empty, PageHead } from "@/components/ui/Page";
@@ -16,7 +16,7 @@ const PER = 25;
 export default async function TransactionsPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;
   const { supabase } = await requireUser();
-  const [accounts, categories] = await Promise.all([getAccounts(), getCategories()]);
+  const [accounts, categories, receipts] = await Promise.all([getAccounts(), getCategories(), getReceiptIds()]);
   const page = Math.max(1, Number(sp.page) || 1);
   const type = ["income", "expense", "transfer"].includes(sp.type ?? "") ? sp.type! : "";
   const range = ["7", "30", "90", "365", "all"].includes(sp.range ?? "") ? sp.range! : "90";
@@ -52,7 +52,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
             <div className="small muted" style={{ display: "flex", gap: 16, flexWrap: "wrap", padding: "14px 2px 4px" }}>
               <span>{count} transactions</span><span>This page: in <b className="pos-t num">{formatINR(inc)}</b></span><span>out <b className="num" style={{ color: "var(--ink)" }}>{formatINR(exp)}</b></span>
             </div>
-            <TxList rows={rows} accounts={accounts} categories={categories} page={page} pages={pages} />
+            <TxList rows={rows} accounts={accounts} categories={categories} receipts={receipts} page={page} pages={pages} />
           </>
         ) : filtered ? (
           <Empty icon={<SearchX size={26} />} title="No matching transactions" body="Try a different search, or widen the date range and filters." />
