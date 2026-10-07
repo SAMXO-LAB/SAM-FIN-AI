@@ -1,11 +1,27 @@
 /** Date helpers working on local calendar dates stored as YYYY-MM-DD. */
 export const DAY = 86_400_000;
 
-export function today(): Date {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
+/** Time zone used when dates are worked out on the server (browsers use the device's own zone). Set APP_TIMEZONE to change it. */
+export const APP_TIMEZONE = process.env.APP_TIMEZONE?.trim() || "Asia/Kolkata";
+
+/** Wall-clock parts of "now" in the app time zone (server) or the device zone (browser). */
+export function nowParts(tz?: string | null): { y: number; m: number; d: number; h: number } {
+  const n = new Date();
+  if (typeof window !== "undefined") return { y: n.getFullYear(), m: n.getMonth() + 1, d: n.getDate(), h: n.getHours() };
+  try {
+    const p = Object.fromEntries(new Intl.DateTimeFormat("en-GB", { timeZone: tz || APP_TIMEZONE, hourCycle: "h23", year: "numeric", month: "numeric", day: "numeric", hour: "numeric" }).formatToParts(n).map((x) => [x.type, Number(x.value)]));
+    return { y: p.year, m: p.month, d: p.day, h: p.hour };
+  } catch {
+    return tz && tz !== APP_TIMEZONE ? nowParts(APP_TIMEZONE) : { y: n.getFullYear(), m: n.getMonth() + 1, d: n.getDate(), h: n.getHours() };
+  }
 }
+
+export function today(tz?: string | null): Date {
+  const { y, m, d } = nowParts(tz);
+  return new Date(y, m - 1, d);
+}
+
+export const greetingFor = (h: number) => (h < 5 ? "Good night" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening");
 export const iso = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 export function parseISO(s: string): Date {

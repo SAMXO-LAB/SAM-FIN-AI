@@ -1,4 +1,5 @@
 import "server-only";
+import { getTimezone } from "../auth";
 import { getAccounts, getBudgets, getCategories, getDebts, getGoals, getLoans, getTransactions } from "../data";
 import { addDays, fmtDate, iso, parseISO, today } from "../dates";
 import { debtSummary, goalPlan, loanSummary, sumRange } from "../finance";
@@ -50,7 +51,7 @@ export async function runTool(name: string, raw: unknown): Promise<string> {
 }
 
 async function dispatch(name: ToolName, i: Record<string, unknown>) {
-  const ref = today(), t = iso(ref);
+  const ref = today(await getTimezone()), t = iso(ref);
   switch (name) {
     case "get_overview": {
       const [accounts, loans, debts, tx, cats] = await Promise.all([getAccounts(), getLoans(), getDebts(), getTransactions({ from: iso(addDays(ref, -59)) }), getCategories()]);

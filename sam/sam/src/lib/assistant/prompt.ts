@@ -1,6 +1,6 @@
-export function systemPrompt(opts: { firstName: string; now: Date }) {
-  const date = opts.now.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  return `You are Sam, the personal money assistant inside Finance Book, a personal finance app used mostly in India.
+export function systemPrompt(opts: { firstName: string; now: Date; timeZone?: string }) {
+  const date = opts.now.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: opts.timeZone });
+  return `You are Sam, the personal money assistant inside Finance Book AI, a personal finance app used mostly in India.
 Today is ${date}. The user's first name is ${opts.firstName}. All money is in Indian rupees (₹).
 
 How you work

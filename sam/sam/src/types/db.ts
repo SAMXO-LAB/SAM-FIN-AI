@@ -4,7 +4,7 @@ export type TxType = "income" | "expense" | "transfer";
 export interface Profile {
   id: string; full_name: string | null; currency: string; country: string | null; income_range: string | null;
   goals: string[]; notify_emi: boolean; notify_bills: boolean; notify_lent: boolean; notify_budget: boolean; onboarded: boolean;
-  gender: "male" | "female" | "unspecified"; avatar_kind: "default" | "preset" | "photo"; avatar_key: string | null; avatar_updated_at: string | null;
+  gender: "male" | "female" | "unspecified"; timezone: string | null; avatar_kind: "default" | "preset" | "photo"; avatar_key: string | null; avatar_updated_at: string | null;
 }
 export interface Account {
   id: string; name: string; institution: string | null; type: AccountType; opening_balance: number;

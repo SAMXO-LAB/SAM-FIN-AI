@@ -1,3 +1,4 @@
+import { isValidZone } from "@/lib/countries";
 import { z } from "zod";
 import { toPaise, toSignedPaise } from "./money";
 
@@ -26,6 +27,7 @@ export const newPasswordSchema = z.object({
   confirm: z.string(),
 }).refine((d) => d.password === d.confirm, { path: ["confirm"], message: "Passwords don’t match." });
 
+export const timezoneSchema = z.string().trim().max(64).optional().transform((v) => (v && isValidZone(v) ? v : null));
 export const genderSchema = z.enum(["male", "female", "unspecified"]).catch("unspecified");
 
 export const onboardingSchema = z.object({
@@ -33,6 +35,7 @@ export const onboardingSchema = z.object({
   gender: genderSchema,
   currency: z.enum(["INR", "USD", "EUR", "GBP", "AED", "SGD"]),
   country: optText(60),
+  timezone: timezoneSchema,
   income_range: optText(40),
   goals: z.array(z.string().max(60)).max(10),
   notify_emi: z.boolean(),
