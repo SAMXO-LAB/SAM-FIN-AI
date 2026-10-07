@@ -1,6 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { requireUser } from "@/lib/auth";
+import { requireUser, getTimezone } from "@/lib/auth";
 import { loanSummary } from "@/lib/finance";
 import { iso, today } from "@/lib/dates";
 import { MAX_RECEIPT_CHARS, parsePhoto } from "@/lib/avatar";
@@ -222,7 +222,7 @@ export async function addGoal(_: ActionState, fd: FormData): Promise<ActionState
   const parsed = parseForm(goalSchema, fd);
   if (!parsed.success) return fieldErrors(parsed.error);
   const { saved, ...goal } = parsed.data;
-  if (goal.target_date <= iso(today())) return { error: "Choose a target date in the future.", fields: { target_date: "Must be in the future." } };
+  if (goal.target_date <= iso(today(await getTimezone()))) return { error: "Choose a target date in the future.", fields: { target_date: "Must be in the future." } };
   const { supabase } = await requireUser();
   const { data, error } = await supabase.from("goals").insert(goal).select("id").single();
   if (error || !data) return fail("create the goal", error ?? undefined);

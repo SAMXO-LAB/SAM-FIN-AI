@@ -13,7 +13,7 @@ Finance Book AI never asks for bank logins, PINs or OTPs.
 ## 1. Create a Supabase project
 1. Create a project at <https://supabase.com>.
 2. **SQL Editor** → paste `supabase/migrations/20261004000000_init.sql` → Run. This creates every table, the RLS policies, triggers and the `delete_my_account()` function.
-3. Also run `supabase/migrations/20261004100000_assistant.sql` (the AI assistant's daily message limit) `supabase/migrations/20261005100000_profile_picture.sql` (profile picture and gender) and `supabase/migrations/20261005200000_receipts.sql` (transaction receipts). The app keeps working if you forget the last two, but pictures, gender and receipts are not saved until they have run. Receipt images are stored in the database (about 300 KB each, 3 per transaction, 300 per user); move them to Supabase Storage if you expect many more.
+3. Also run `supabase/migrations/20261004100000_assistant.sql` (the AI assistant's daily message limit) `supabase/migrations/20261005100000_profile_picture.sql` (profile picture and gender) `supabase/migrations/20261005200000_receipts.sql` (transaction receipts) and `supabase/migrations/20261007100000_timezone.sql` (country time zone). The app keeps working if you forget the last three, but pictures, gender, receipts and the chosen time zone are not saved until they have run (dates then use Asia/Kolkata, or `APP_TIMEZONE`). Receipt images are stored in the database (about 300 KB each, 3 per transaction, 300 per user); move them to Supabase Storage if you expect many more.
 4. **Project settings → API**: copy the Project URL and the `anon` public key.
 
 ## 2. Configure auth

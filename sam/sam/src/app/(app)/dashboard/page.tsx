@@ -3,9 +3,9 @@ import Link from "next/link";
 import {
   ArrowDownLeft, ArrowUpRight, CalendarCheck, ChartPie, ChevronRight, CircleCheck, HandCoins, Handshake, Landmark, PiggyBank, Plus, Sparkles, Target, TrendingUp, Wallet,
 } from "lucide-react";
-import { getProfile } from "@/lib/auth";
+import { getProfile, getTimezone } from "@/lib/auth";
 import { getAccounts, getBudgets, getCategories, getDebts, getGoals, getLoans, getTransactions } from "@/lib/data";
-import { addDays, fmtDate, fmtShort, iso, parseISO, relDay, today } from "@/lib/dates";
+import { addDays, fmtDate, fmtShort, greetingFor, iso, nowParts, parseISO, relDay, today } from "@/lib/dates";
 import { debtSummary, loanSummary, spendByCategory, sumRange } from "@/lib/finance";
 import { compactINR, formatINR, pct } from "@/lib/money";
 import { CountUp } from "@/components/motion/CountUp";
@@ -13,15 +13,16 @@ import { cashflowSeries, spendingInsights } from "@/lib/analytics";
 import { CashFlowChart } from "@/components/charts/CashFlowChart";
 import { Donut } from "@/components/charts/Donut";
 import { Empty } from "@/components/ui/Page";
+import { GreetingHead } from "@/features/finance/Greeting";
 import { AccountButton, BudgetButton, LoanButton, TransactionButton } from "@/features/finance/forms";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
-const greet = () => { const h = new Date().getHours(); return h < 5 ? "Good night" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; };
 
 export default async function Dashboard({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;
-  const ref = today(), t = iso(ref);
+  const tz = await getTimezone();
+  const ref = today(tz), t = iso(ref);
   const [profile, accounts, categories, tx, loans, debts, goals, budgets] = await Promise.all([
     getProfile(), getAccounts(), getCategories(), getTransactions({ from: iso(addDays(ref, -365)) }), getLoans(), getDebts(), getGoals(), getBudgets(),
   ]);
@@ -75,10 +76,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   return (
     <>
       <div className="page-head">
-        <div>
-          <div className="eyebrow">{ref.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}</div>
-          <h1 className="page-title">{greet()}, {first}</h1>
-        </div>
+        <GreetingHead first={first} serverGreeting={greetingFor(nowParts(tz).h)} serverDate={ref.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })} />
         {accounts.length > 0 && <div className="head-actions show-mob"><TransactionButton accounts={accounts} categories={categories} trigger={<><Plus size={16} />Add transaction</>} /></div>}
       </div>
 

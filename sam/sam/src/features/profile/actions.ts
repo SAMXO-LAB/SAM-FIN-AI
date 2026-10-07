@@ -5,10 +5,10 @@ import { z } from "zod";
 import { getProfile, requireUser } from "@/lib/auth";
 import { parsePhoto } from "@/lib/avatar";
 import { isPresetKey } from "@/components/avatar/presets";
-import { fieldErrors, genderSchema, onboardingSchema } from "@/lib/validation";
+import { fieldErrors, genderSchema, onboardingSchema, timezoneSchema } from "@/lib/validation";
 import type { ActionState } from "@/types/db";
 
-const NEW_COLS = ["gender", "avatar_kind", "avatar_key", "avatar_data", "avatar_updated_at"];
+const NEW_COLS = ["timezone", "gender", "avatar_kind", "avatar_key", "avatar_data", "avatar_updated_at"];
 /** Updates the profile row. If the picture/gender migration has not been run yet, saves everything else. */
 async function saveProfileRow(supabase: Awaited<ReturnType<typeof requireUser>>["supabase"], id: string, patch: Record<string, unknown>) {
   const first = await supabase.from("profiles").update(patch).eq("id", id);
@@ -19,7 +19,7 @@ async function saveProfileRow(supabase: Awaited<ReturnType<typeof requireUser>>[
 
 export async function saveOnboarding(_: ActionState, fd: FormData): Promise<ActionState> {
   const parsed = onboardingSchema.safeParse({
-    full_name: fd.get("full_name"), gender: fd.get("gender") ?? "unspecified", currency: fd.get("currency"), country: fd.get("country") || undefined,
+    full_name: fd.get("full_name"), gender: fd.get("gender") ?? "unspecified", currency: fd.get("currency"), country: fd.get("country") || undefined, timezone: fd.get("timezone") || undefined,
     income_range: fd.get("income_range") || undefined, goals: fd.getAll("goals").map(String),
     notify_emi: fd.get("notify_emi") === "on", notify_bills: fd.get("notify_bills") === "on",
   });
@@ -34,6 +34,7 @@ const profileSchema = z.object({
   full_name: z.string().trim().min(1, "Enter your name.").max(80),
   currency: z.enum(["INR", "USD", "EUR", "GBP", "AED", "SGD"]),
   country: z.string().trim().max(60).optional().transform((v) => v || null),
+  timezone: timezoneSchema,
   gender: genderSchema,
   avatar_kind: z.enum(["default", "preset", "photo"]).catch("default"),
   avatar_key: z.string().max(4).optional(),
@@ -42,11 +43,12 @@ const profileSchema = z.object({
 export async function updateProfile(_: ActionState, fd: FormData): Promise<ActionState> {
   const parsed = profileSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return fieldErrors(parsed.error);
-  const { full_name, currency, country, gender, avatar_kind, avatar_key, avatar_photo } = parsed.data;
+  const { full_name, currency, country, timezone, gender, avatar_kind, avatar_key, avatar_photo } = parsed.data;
   const { supabase, user } = await requireUser();
   const current = await getProfile();
 
   const patch: Record<string, unknown> = { full_name, currency, country, gender };
+  if (timezone) patch.timezone = timezone;
   const stamp = new Date().toISOString();
   if (avatar_kind === "preset") {
     if (!isPresetKey(avatar_key)) return { error: "Choose one of the pictures shown." };

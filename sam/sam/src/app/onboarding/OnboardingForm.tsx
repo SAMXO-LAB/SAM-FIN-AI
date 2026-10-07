@@ -4,6 +4,8 @@ import { ArrowRight, ShieldCheck } from "lucide-react";
 import { LogoMark } from "@/components/Brand";
 import { FormError, SubmitButton } from "@/components/ui/Form";
 import { saveOnboarding } from "@/features/profile/actions";
+import { CountryTimezone } from "@/features/profile/CountryTimezone";
+import { CURRENCIES } from "@/lib/labels";
 
 const GOALS = ["Build an emergency fund", "Pay off loans faster", "Save for travel", "Track who owes me", "Control daily spending", "Plan a big purchase"];
 const INCOME = ["Under ₹25,000", "₹25,000 – ₹50,000", "₹50,000 – ₹1 lakh", "₹1 – 2 lakh", "Over ₹2 lakh", "Prefer not to say"];
@@ -14,6 +16,7 @@ export function OnboardingForm({ name }: { name: string }) {
   const [step, setStep] = useState(0);
   const [nm, setNm] = useState(name);
   const [gender, setGender] = useState("unspecified");
+  const [cur, setCur] = useState<string>("INR");
   return (
     <form action={action} className="sheet g4" style={{ width: "min(560px,100%)" }} noValidate>
       <div className="sheet-head">
@@ -38,8 +41,9 @@ export function OnboardingForm({ name }: { name: string }) {
           <span className="hint">Used to pick your starting profile picture. You can upload your own photo later in Settings.</span>
         </div>
         <div className="form-grid">
-          <div className="field"><label htmlFor="ob-cur">Currency</label><select className="select" id="ob-cur" name="currency" defaultValue="INR">{["INR", "USD", "EUR", "GBP", "AED", "SGD"].map((c) => <option key={c}>{c}</option>)}</select></div>
-          <div className="field"><label htmlFor="ob-country">Country</label><input className="input" id="ob-country" name="country" defaultValue="India" maxLength={60} /></div>
+          <CountryTimezone idPrefix="ob" defaultCountry="India" defaultTimezone="Asia/Kolkata" detect onCountry={(c) => c?.currency && setCur(c.currency)}>
+            <div className="field"><label htmlFor="ob-cur">Currency</label><select className="select" id="ob-cur" name="currency" value={cur} onChange={(e) => setCur(e.target.value)}>{CURRENCIES.map((c) => <option key={c}>{c}</option>)}</select></div>
+          </CountryTimezone>
         </div>
       </div>
 

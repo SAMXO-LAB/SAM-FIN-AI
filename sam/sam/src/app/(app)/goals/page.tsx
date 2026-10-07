@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTimezone } from "@/lib/auth";
 import { CirclePlus, Plus, Target, Trash2 } from "lucide-react";
 import { getGoals } from "@/lib/data";
 import { fmtDate, today } from "@/lib/dates";
@@ -14,7 +15,7 @@ export const metadata: Metadata = { title: "Goals" };
 
 export default async function GoalsPage() {
   const goals = await getGoals();
-  const ref = today();
+  const ref = today(await getTimezone());
   const add = <GoalButton trigger={<><Plus size={16} />New goal</>} />;
   return (
     <>

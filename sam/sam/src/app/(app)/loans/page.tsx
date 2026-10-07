@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTimezone } from "@/lib/auth";
 import { Check, Landmark, Plus, Trash2 } from "lucide-react";
 import { getAccounts, getLoans } from "@/lib/data";
 import { fmtDate, fmtShort, today } from "@/lib/dates";
@@ -15,7 +16,7 @@ export const metadata: Metadata = { title: "EMIs & Loans" };
 
 export default async function LoansPage() {
   const [loans, accounts] = await Promise.all([getLoans(), getAccounts()]);
-  const ref = today();
+  const ref = today(await getTimezone());
   const st = loans.map((l) => ({ l, s: loanSummary(l, l.payments.length, ref) }));
   const out = st.reduce((a, x) => a + x.s.outstanding, 0);
   const emi = st.reduce((a, x) => a + (x.s.next ? x.s.emi : 0), 0);

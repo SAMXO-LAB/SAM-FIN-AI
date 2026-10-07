@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTimezone } from "@/lib/auth";
 import { ChartPie, Pencil, Plus, Trash2 } from "lucide-react";
 import { getBudgets, getCategories, getTransactions } from "@/lib/data";
 import { iso, today } from "@/lib/dates";
@@ -12,7 +13,7 @@ import { deleteBudget } from "@/features/finance/actions";
 export const metadata: Metadata = { title: "Budgets" };
 
 export default async function BudgetsPage() {
-  const ref = today();
+  const ref = today(await getTimezone());
   const monthStart = iso(new Date(ref.getFullYear(), ref.getMonth(), 1));
   const [budgets, categories, tx] = await Promise.all([getBudgets(), getCategories(), getTransactions({ from: monthStart })]);
   const spent: Record<string, number> = {};

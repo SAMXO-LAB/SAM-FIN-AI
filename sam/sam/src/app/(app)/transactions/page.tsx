@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Download, Plus, ReceiptText, SearchX } from "lucide-react";
-import { requireUser } from "@/lib/auth";
+import { requireUser, getTimezone } from "@/lib/auth";
 import { getAccounts, getCategories, getReceiptIds } from "@/lib/data";
 import { addDays, iso, today } from "@/lib/dates";
 import { formatINR } from "@/lib/money";
@@ -27,7 +27,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   if (type) query = query.eq("type", type);
   if (sp.cat && /^[0-9a-f-]{36}$/.test(sp.cat)) query = query.eq("category_id", sp.cat);
   if (sp.acc && /^[0-9a-f-]{36}$/.test(sp.acc)) query = query.or(`account_id.eq.${sp.acc},from_account_id.eq.${sp.acc},to_account_id.eq.${sp.acc}`);
-  if (range !== "all") query = query.gte("occurred_on", iso(addDays(today(), -(Number(range) - 1))));
+  if (range !== "all") query = query.gte("occurred_on", iso(addDays(today(await getTimezone()), -(Number(range) - 1))));
   if (q) query = query.or(`description.ilike.%${q}%,counterparty.ilike.%${q}%,notes.ilike.%${q}%`);
   const { data, count, error } = await query
     .order(sort, { ascending: false }).order("created_at", { ascending: false })

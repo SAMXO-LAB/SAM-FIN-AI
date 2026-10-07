@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTimezone } from "@/lib/auth";
 import { HandCoins, Handshake, Trash2, UserPlus, CirclePlus } from "lucide-react";
 import { getDebts } from "@/lib/data";
 import { fmtDate, fmtShort, today } from "@/lib/dates";
@@ -15,7 +16,8 @@ const initials = (n: string) => n.trim().split(/\s+/).map((w) => w[0]).slice(0, 
 
 export async function PeopleView({ direction, filter }: { direction: "lent" | "borrowed"; filter: string }) {
   const L = direction === "lent";
-  const all = (await getDebts()).filter((d) => d.direction === direction).map((d) => ({ d, s: debtSummary(d, d.payments, today()) }));
+  const ref = today(await getTimezone());
+  const all = (await getDebts()).filter((d) => d.direction === direction).map((d) => ({ d, s: debtSummary(d, d.payments, ref) }));
   const f = ["open", "overdue", "paid", "all"].includes(filter) ? filter : "open";
   const list = all.filter(({ s }) => (f === "all" ? true : f === "open" ? s.remaining > 0 : f === "overdue" ? s.status === "Overdue" : s.status === "Paid"));
   const outstanding = all.reduce((a, x) => a + x.s.remaining, 0);

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTimezone } from "@/lib/auth";
 import { Pencil, Plus, Trash2, Wallet } from "lucide-react";
 import { getAccounts, getTransactions } from "@/lib/data";
 import { addDays, iso, today } from "@/lib/dates";
@@ -13,7 +14,7 @@ import { deleteAccount } from "@/features/finance/actions";
 export const metadata: Metadata = { title: "Accounts" };
 
 export default async function AccountsPage() {
-  const [accounts, tx] = await Promise.all([getAccounts(), getTransactions({ from: iso(addDays(today(), -29)) })]);
+  const [accounts, tx] = await Promise.all([getAccounts(), getTransactions({ from: iso(addDays(today(await getTimezone()), -29)) })]);
   const total = accounts.reduce((s, a) => s + a.balance, 0);
   const sum = (f: (t: string) => boolean) => accounts.filter((a) => f(a.type)).reduce((s, a) => s + a.balance, 0);
   const flow = (id: string) => {

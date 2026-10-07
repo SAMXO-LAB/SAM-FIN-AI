@@ -21,6 +21,8 @@ export default function Privacy() {
       <p>Your name and email address, and a password if you sign up with email. Passwords are never stored in readable form; they are hashed by our authentication provider.</p>
       <h3>If you sign in with Google</h3>
       <p>Google tells us your name and email address, and it also passes along your Google profile picture address. We use the name and email only to create and recognise your account, and we do not display or copy your Google picture. We do not ask for access to your Gmail, contacts, Drive, calendar or any other Google data.</p>
+      <h3>Country and time zone</h3>
+<p>At sign-up we suggest your country, time zone and currency from your device’s clock settings, and you can change them. We store your choices so that dates, due reminders and your greeting follow your local time. We do not collect your location.</p>
       <h3>Profile picture and gender (optional)</h3>
 <p>You can choose a built-in picture or upload your own photo, and you can say whether you are male, female or prefer not to say. Gender is used only to choose a default picture. A photo is cropped and resized on your own device, then stored in your account in our database. It is shown only to you and is deleted when you remove it or delete your account. Please do not upload photos of other people.</p>
       <h3>Money records you enter</h3>

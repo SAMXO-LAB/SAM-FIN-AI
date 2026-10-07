@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { getTimezone } from "@/lib/auth";
 import { runAssistant } from "@/lib/assistant/run";
 import { systemPrompt } from "@/lib/assistant/prompt";
 import { takeMessage } from "@/lib/assistant/limit";
@@ -36,8 +37,9 @@ export async function POST(req: Request) {
   if (!(await takeMessage(supabase, user.id))) return json(429, "daily_limit");
 
   const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+  const timeZone = await getTimezone();
   const raw = ((profile?.full_name as string | null) || "").trim().split(" ")[0] || "there";
-  const system = systemPrompt({ firstName: raw.charAt(0).toUpperCase() + raw.slice(1), now: new Date() });
+  const system = systemPrompt({ firstName: raw.charAt(0).toUpperCase() + raw.slice(1), now: new Date(), timeZone });
 
   const enc = new TextEncoder();
   const stream = new ReadableStream({
