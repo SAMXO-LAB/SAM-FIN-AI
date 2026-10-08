@@ -987,3 +987,23 @@ html{scrollbar-width:thin;scrollbar-color:var(--line-strong) transparent}
   .nav-group{margin-bottom:6px}
   .side .brand{padding-bottom:8px}
 }
+
+/* AI-style glow around the Ask Sam box: a slow colour sweep that brightens on focus. */
+@property --ask-ang{syntax:"<angle>";inherits:false;initial-value:0deg}
+@keyframes askSpin{to{--ask-ang:360deg}}
+@keyframes askPulse{0%,100%{opacity:.35}50%{opacity:.6}}
+.ask-field{position:relative;flex:1;min-width:0;border-radius:17px;padding:2px;isolation:isolate}
+.ask-field::before,.ask-field::after{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;background:conic-gradient(from var(--ask-ang),#4f7bea,#7c4dff,#22d3ee,#34d399,#4f7bea);animation:askSpin 5s linear infinite}
+.ask-field::after{inset:-3px;filter:blur(14px);opacity:.4;animation:askSpin 5s linear infinite,askPulse 3.2s ease-in-out infinite}
+.ask-field:focus-within::before{animation-duration:2.6s}
+.ask-field:focus-within::after{opacity:.75;filter:blur(18px);animation:askSpin 2.6s linear infinite}
+.ask-field .ask-input{border:0;background:#F8FAFF;height:48px;border-radius:15px;box-shadow:none}
+.ask-field .ask-input:focus{box-shadow:none}
+.ask-send{transition:transform .25s var(--spring,var(--ease)),box-shadow .25s,background .25s}
+.ask-send:not(:disabled):hover{transform:translateY(-2px) scale(1.04);box-shadow:0 8px 24px rgba(79,123,234,.45)}
+@media (prefers-reduced-motion:reduce){.ask-field::before,.ask-field::after{animation:none}.ask-field::after{opacity:.3}}
+/* the chat box on the Ask Sam page glows softly while you type */
+.chat-form .chat-input:focus{border-color:transparent;box-shadow:0 0 0 2px #7c8cf0,0 0 22px rgba(124,77,255,.28)}
+
+:root[data-theme="dark"] .ask-field .ask-input{background:#0F1426}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ask-field .ask-input{background:#0F1426}}
