@@ -4,6 +4,7 @@ import { getAccounts, getBudgets, getCategories, getDebts, getGoals, getLoans, g
 import { addDays, fmtDate, iso, parseISO, today } from "../dates";
 import { debtSummary, goalPlan, loanSummary, sumRange } from "../finance";
 import { formatINR, toPaise, type Paise } from "../money";
+import { getInsights } from "../insights";
 import { emiQuote, groupTotals, rupees, simulatePrepayment } from "./calc";
 
 /** Read-only tools. Each runs as the signed-in user, so Row Level Security limits every result to their own records. */
@@ -21,6 +22,10 @@ export const TOOLS = [
   { name: "get_debts", description: "Money the user has lent to people or borrowed from people, with repayments, remaining amounts, due dates and status.", input_schema: { type: "object", properties: { direction: { type: "string", enum: ["lent", "borrowed"] } }, additionalProperties: false } },
   { name: "get_budgets", description: "Monthly budgets per category with this month's spending against each limit.", input_schema: { type: "object", properties: {}, additionalProperties: false } },
   { name: "get_goals", description: "Savings goals with progress and the suggested monthly saving to reach each by its date.", input_schema: { type: "object", properties: {}, additionalProperties: false } },
+  { name: "get_forecast", description: "The user's financial forecast, calculated from their own history: expected savings next month with a likely range, EMIs and recurring bills due next month, projected balance over 12 months, where this month's spending is heading by category, expected cash at month end, when each goal could be reached, and warnings. Use for any question about the future, such as how much they will save, whether they will run short, or when a goal will be reached. Quote the figures; say they are estimates.", input_schema: { type: "object", properties: {}, additionalProperties: false } },
+  { name: "get_recommendations", description: "Personalised, prioritised recommendations built from the user's own numbers (spending above usual, savings rate, emergency cushion, high-interest debt versus spare cash, goals behind schedule, overdue money lent, EMI burden). Use when the user asks what they should do, how to save more, or what to improve.", input_schema: { type: "object", properties: {}, additionalProperties: false } },
+  { name: "get_health_score", description: "The user's Finance Book Score out of 100 with its label (Excellent, Healthy, Fair, Needs attention, At risk), the seven parts that make it up (savings rate, emergency fund, EMI burden, spending habits, debt, goal progress, income stability) each with its own score and reason, the score for recent months, why it changed since last month, and where the next points would come from. Use when the user asks about their financial health, their score, or why it went up or down.", input_schema: { type: "object", properties: {}, additionalProperties: false } },
+  { name: "get_alerts", description: "The user's current smart alerts: EMIs and repayments due soon or overdue, categories running above their normal average, budgets nearly used, unusually large purchases, unused money this month with a suggestion, and cash shortfalls. Use when the user asks what needs attention, what is due, or whether anything is wrong.", input_schema: { type: "object", properties: {}, additionalProperties: false } },
   { name: "calculate_emi", description: "Calculate the EMI, total interest and total payment for a hypothetical loan. Use for what-if questions about a new loan.", input_schema: { type: "object", properties: {
     principal_inr: { type: "number", description: "Loan amount in rupees" }, annual_rate_pct: { type: "number" }, months: { type: "integer", minimum: 1, maximum: 480 }, method: { type: "string", enum: ["reducing", "flat"] } },
     required: ["principal_inr", "annual_rate_pct", "months"], additionalProperties: false } },
@@ -167,6 +172,40 @@ async function dispatch(name: ToolName, i: Record<string, unknown>) {
       if (!P || r === null || r < 0 || r > 100 || !n || n < 1 || n > 480 || !Number.isInteger(n)) return { error: "Need a positive loan amount, a rate between 0 and 100, and 1 to 480 whole months." };
       const q = emiQuote(P, r, n, i.method === "flat" ? "flat" : "reducing", t);
       return { principal: money(P), annual_rate_pct: r, months: n, method: i.method === "flat" ? "flat" : "reducing", emi: money(q.emi), total_interest: money(q.totalInterest), total_payment: money(q.totalPayment), label: "calculated" };
+    }
+    case "get_forecast": {
+      const { forecast: f } = await getInsights();
+      if (!f.ready) return { ready: false, reason: f.reason, note: "Not enough history yet. Say so and suggest recording a full month of transactions." };
+      return {
+        ready: true, label: "estimates from past months, assuming income and habits stay about the same", confidence: f.confidence, months_of_history: f.monthsUsed, summary: f.headline,
+        next_month: { month: f.next.label, expected_income: money(f.next.income), usual_everyday_spending: money(f.next.variable), emis: money(f.next.emi), expected_savings: money(f.next.savings), likely_range: { low: money(f.next.low), high: money(f.next.high) }, savings_rate_pct: pctOf(f.next.savingsRate) },
+        recurring_next_month: { emis: money(f.recurring.emi), rent: money(f.recurring.housing), bills: money(f.recurring.bills), subscriptions: money(f.recurring.subscriptions), total: money(f.recurring.total), repayments_you_owe_due: money(f.recurring.debtsDue) },
+        next_12_months: { saved_in_total: money(f.projection.total), balance_today: money(f.projection.start), balance_after_12_months: money(f.projection.end) },
+        this_month: { month: f.thisMonth.label, days_left: f.thisMonth.daysLeft, available_cash_now: money(f.thisMonth.availableNow), expected_cash_at_month_end: money(f.thisMonth.endCash),
+          categories: f.thisMonth.categories.slice(0, 8).map((c) => ({ category: c.name, spent_so_far: money(c.spent), likely_this_month: money(c.projected), usual: money(c.usual), budget: c.budget ? money(c.budget) : null, status: c.status })) },
+        goals: f.goals.slice(0, 6).map((g) => ({ goal: g.name, remaining: money(g.remaining), target_date: g.targetDate, current_pace_per_month: money(g.paceMonthly), months_at_current_pace: g.etaMonths, months_if_all_forecast_savings_used: g.etaAtSavings, status: g.status })),
+        warnings: f.warnings.slice(0, 5).map((w) => ({ level: w.level, title: w.title, detail: w.body })),
+      };
+    }
+    case "get_recommendations": {
+      const { recs, forecast } = await getInsights();
+      if (!recs.items.length) return { ready: recs.ready, reason: forecast.reason, recommendations: [] };
+      return { ready: recs.ready, note: "Suggestions from the user's own numbers, not financial advice.", recommendations: recs.items.slice(0, 8).map((r) => ({ priority: r.priority, title: r.title, detail: r.body, impact: r.impact ?? null })) };
+    }
+    case "get_health_score": {
+      const { health: h } = await getInsights();
+      if (!h.now.ready) return { ready: false, reason: h.now.reason };
+      return {
+        ready: true, score: h.now.score, out_of: 100, label: h.now.label, note: "Calculated from the user's own records; a guide, not a credit score.",
+        parts: h.now.components.map((c) => ({ name: c.name, weight_pct: c.weight, score: c.score, measured: c.metric, detail: c.detail, how_to_improve: c.improve })),
+        history: h.history.map((x) => ({ month: x.label, score: x.score })),
+        changed_since_last_month: h.change ? { points: h.change.points, summary: h.change.summary, drivers: h.change.drivers.map((d) => ({ part: d.name, points: d.points, what: d.text })) } : null,
+        next_gains: h.opportunities.map((o) => ({ part: o.name, up_to_points: o.gain, how: o.text })),
+      };
+    }
+    case "get_alerts": {
+      const { alerts } = await getInsights();
+      return { count: alerts.length, alerts: alerts.slice(0, 10).map((a) => ({ urgency: a.level, title: a.title, detail: a.body })) };
     }
     case "simulate_prepayment": {
       const loans = await getLoans();

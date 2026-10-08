@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  ArrowDownLeft, ArrowUpRight, CalendarCheck, ChartPie, ChevronRight, CircleCheck, HandCoins, Handshake, Landmark, PiggyBank, Plus, Sparkles, Target, TrendingUp, Wallet,
+  ArrowDownLeft, ArrowUpRight, BellRing, CalendarCheck, ChartPie, ChevronRight, CircleCheck, Gauge, HandCoins, Handshake, Landmark, PiggyBank, Plus, Sparkles, Target, TrendingUp, Wallet,
 } from "lucide-react";
 import { getProfile, getTimezone } from "@/lib/auth";
 import { getAccounts, getBudgets, getCategories, getDebts, getGoals, getLoans, getTransactions } from "@/lib/data";
@@ -14,6 +14,10 @@ import { CashFlowChart } from "@/components/charts/CashFlowChart";
 import { Donut } from "@/components/charts/Donut";
 import { Empty } from "@/components/ui/Page";
 import { GreetingHead } from "@/features/finance/Greeting";
+import { getInsights } from "@/lib/insights";
+import { RecCard } from "@/features/insights/RecCard";
+import { AlertCard } from "@/features/insights/AlertCard";
+import { LABEL_TONE, ScoreRing } from "@/features/insights/ScoreRing";
 import { AccountButton, BudgetButton, LoanButton, TransactionButton } from "@/features/finance/forms";
 
 export const metadata: Metadata = { title: "Dashboard" };
@@ -28,6 +32,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   ]);
   const rawFirst = (profile?.full_name || "there").trim().split(" ")[0];
   const first = rawFirst.charAt(0).toUpperCase() + rawFirst.slice(1);
+  const insights = await getInsights().catch(() => null);
   const catById = new Map(categories.map((c) => [c.id, c]));
   const catName = (id: string | null) => (id && catById.get(id)?.name) || "Uncategorised";
   const txl = tx.map((x) => ({ ...x, category: catName(x.category_id) }));
@@ -118,6 +123,27 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           </div>
         </section>
 
+        {insights && (
+          <section className="card g2 s4" aria-label="Finance Book Score">
+            <div className="card-head"><div><h3 className="h3">Finance Book Score</h3><div className="sub">Savings, debt, EMIs, habits, cushion, goals</div></div><Link className="link" href="/health">Details <ChevronRight size={14} /></Link></div>
+            {insights.health.now.ready ? (
+              <div className="dash-score">
+                <ScoreRing score={insights.health.now.score} label={insights.health.now.label} size={140} />
+                <span className={`pill plain ${LABEL_TONE[insights.health.now.label]}`}>{insights.health.now.label}{insights.health.change && insights.health.change.points !== 0 ? ` · ${insights.health.change.points > 0 ? "+" : "−"}${Math.abs(insights.health.change.points)} this month` : ""}</span>
+                {insights.health.change && <p className="small muted" style={{ margin: 0 }}>{insights.health.change.summary}</p>}
+              </div>
+            ) : <Empty icon={<Gauge size={26} />} title="Score on its way" body="Record a full month of income and spending to see it." />}
+          </section>
+        )}
+
+        {insights && (
+          <section className="card g2 s8" aria-label="Smart alerts">
+            <div className="card-head"><div><h3 className="h3">Smart alerts</h3><div className="sub">{insights.alerts.length ? `${insights.alerts.length} for you right now` : "Based on your own records"}</div></div><Link className="link" href="/alerts">All <ChevronRight size={14} /></Link></div>
+            {insights.alerts.length ? <div className="rec-list">{insights.alerts.slice(0, 4).map((a) => <AlertCard key={a.id} a={a} compact />)}</div>
+              : <Empty icon={<BellRing size={26} />} title="All clear" body="No payments due soon and spending is in line with your usual." />}
+          </section>
+        )}
+
         <section className="card g2 s8"><CashFlowChart series={cashflowSeries(tx, ref)} /></section>
 
         <section className="card g2 s4">
@@ -171,6 +197,25 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
             ); })}</div>
           ) : <Empty icon={<Target size={26} />} title="No goals yet" body="Set a target and Sam works out the monthly number."><Link href="/goals" className="btn btn-glass btn-sm">Create a goal</Link></Empty>}
         </section>
+
+        {insights?.forecast.ready && (
+          <section className="card g2 s6" aria-label="Forecast">
+            <div className="card-head"><div><h3 className="h3">Looking ahead</h3><div className="sub">{insights.forecast.next.label} · estimate</div></div><Link className="link" href="/forecast">Forecast <ChevronRight size={14} /></Link></div>
+            <p className="fc-headline" style={{ fontSize: 20, margin: "0 0 14px" }}>{insights.forecast.headline}</p>
+            <div className="rows">
+              <div className="row"><span className="ic"><Landmark size={17} /></span><div className="bd"><div className="t">EMIs and bills next month</div><div className="s">EMIs, rent, bills and subscriptions</div></div><div className="amt">{formatINR(insights.forecast.recurring.total)}</div></div>
+              <div className="row"><span className="ic"><Wallet size={17} /></span><div className="bd"><div className="t">Cash at end of month</div><div className="s">If current spending continues</div></div><div className={`amt ${insights.forecast.thisMonth.endCash < 0 ? "neg-t" : ""}`}>{formatINR(insights.forecast.thisMonth.endCash)}</div></div>
+              <div className="row"><span className="ic"><PiggyBank size={17} /></span><div className="bd"><div className="t">Saved over 12 months</div><div className="s">At your usual pace</div></div><div className="amt">{formatINR(insights.forecast.projection.total)}</div></div>
+            </div>
+          </section>
+        )}
+
+        {insights && insights.recs.items.length > 0 && (
+          <section className="card g2 s6" aria-label="Recommendations">
+            <div className="card-head"><div><h3 className="h3">Recommended for you</h3><div className="sub">From your own numbers</div></div><Link className="link" href="/recommendations">All <ChevronRight size={14} /></Link></div>
+            <div className="rec-list">{insights.recs.items.slice(0, 3).map((r) => <RecCard key={r.id} r={r} compact />)}</div>
+          </section>
+        )}
 
         <section className="card g2 s6">
           <div className="card-head"><div><h3 className="h3">Money owed to you</h3><div className="sub">{formatINR(owedToYou)} outstanding</div></div><Link className="link" href="/lent">Money lent <ChevronRight size={14} /></Link></div>
