@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useTypingHint } from "./useTypingHint";
 import { ArrowUp, Sparkles } from "lucide-react";
 
 const EXAMPLES = ["how much did I spend on food?", "what is my Finance Book Score?", "when does my next EMI fall due?", "can I afford a ₹20,000 purchase?", "who owes me money?", "how can I save more this month?"];
@@ -10,21 +11,7 @@ const QUICK = ["How am I doing this month?", "What is my Finance Book Score?", "
 export function AskSam({ firstName }: { firstName: string }) {
   const r = useRouter();
   const [q, setQ] = useState("");
-  // The placeholder types out example questions, like other AI apps. It stops while you type and for people who prefer reduced motion.
-  const [hint, setHint] = useState(`Ask anything, ${firstName}. For example: ${EXAMPLES[0]}`);
-  useEffect(() => {
-    if (typeof window === "undefined" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let i = 0, n = 0, dir = 1, wait = 0;
-    const t = setInterval(() => {
-      if (wait > 0) { wait--; return; }
-      const full = EXAMPLES[i];
-      n += dir;
-      if (dir === 1 && n >= full.length) { dir = -1; wait = 22; }
-      else if (dir === -1 && n <= 0) { dir = 1; i = (i + 1) % EXAMPLES.length; wait = 4; }
-      setHint(`Ask anything, ${firstName}. For example: ${full.slice(0, Math.max(n, 0))}`);
-    }, 55);
-    return () => clearInterval(t);
-  }, [firstName]);
+  const hint = useTypingHint(`Ask anything, ${firstName}. For example: `, EXAMPLES);
   const go = (text: string) => { const t = text.trim(); if (t) r.push(`/assistant?q=${encodeURIComponent(t.slice(0, 500))}`); };
   return (
     <section className="ask g3" aria-label="Ask Sam">
