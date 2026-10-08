@@ -1,237 +1,99 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import {
-  ArrowDownLeft, ArrowUpRight, BellRing, CalendarCheck, ChartPie, ChevronRight, CircleCheck, Gauge, HandCoins, Handshake, Landmark, PiggyBank, Plus, Sparkles, Target, TrendingUp, Wallet,
-} from "lucide-react";
-import { getProfile, getTimezone } from "@/lib/auth";
-import { getAccounts, getBudgets, getCategories, getDebts, getGoals, getLoans, getTransactions } from "@/lib/data";
-import { addDays, fmtDate, fmtShort, greetingFor, iso, nowParts, parseISO, relDay, today } from "@/lib/dates";
-import { debtSummary, loanSummary, spendByCategory, sumRange } from "@/lib/finance";
-import { compactINR, formatINR, pct } from "@/lib/money";
-import { CountUp } from "@/components/motion/CountUp";
-import { cashflowSeries, spendingInsights } from "@/lib/analytics";
-import { CashFlowChart } from "@/components/charts/CashFlowChart";
-import { Donut } from "@/components/charts/Donut";
-import { Empty } from "@/components/ui/Page";
-import { GreetingHead } from "@/features/finance/Greeting";
-import { getInsights } from "@/lib/insights";
-import { RecCard } from "@/features/insights/RecCard";
-import { AlertCard } from "@/features/insights/AlertCard";
-import { LABEL_TONE, ScoreRing } from "@/features/insights/ScoreRing";
-import { AccountButton, BudgetButton, LoanButton, TransactionButton } from "@/features/finance/forms";
+import { ContactLine, LegalLayout } from "@/components/Legal";
 
-export const metadata: Metadata = { title: "Dashboard" };
+export const metadata: Metadata = { title: "Privacy Policy", description: "What Finance Book AI collects, why, who sees it, and how to download or delete your data." };
 
-
-export default async function Dashboard({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
-  const sp = await searchParams;
-  const tz = await getTimezone();
-  const ref = today(tz), t = iso(ref);
-  const [profile, accounts, categories, tx, loans, debts, goals, budgets] = await Promise.all([
-    getProfile(), getAccounts(), getCategories(), getTransactions({ from: iso(addDays(ref, -365)) }), getLoans(), getDebts(), getGoals(), getBudgets(),
-  ]);
-  const rawFirst = (profile?.full_name || "there").trim().split(" ")[0];
-  const first = rawFirst.charAt(0).toUpperCase() + rawFirst.slice(1);
-  const insights = await getInsights().catch(() => null);
-  const catById = new Map(categories.map((c) => [c.id, c]));
-  const catName = (id: string | null) => (id && catById.get(id)?.name) || "Uncategorised";
-  const txl = tx.map((x) => ({ ...x, category: catName(x.category_id) }));
-
-  // Totals — all deterministic, from recorded data
-  let balance = 0, available = 0;
-  for (const a of accounts) { balance += a.balance; if (a.type !== "savings") available += a.balance; }
-  const loanStats = loans.map((l) => ({ l, s: loanSummary(l, l.payments.length, ref) }));
-  const loanOut = loanStats.reduce((s, x) => s + x.s.outstanding, 0);
-  const emiMonthly = loanStats.reduce((s, x) => s + (x.s.next ? x.s.emi : 0), 0);
-  const debtStats = debts.map((d) => ({ d, s: debtSummary(d, d.payments, ref) }));
-  const owedToYou = debtStats.filter((x) => x.d.direction === "lent").reduce((s, x) => s + x.s.remaining, 0);
-  const youOwe = debtStats.filter((x) => x.d.direction === "borrowed").reduce((s, x) => s + x.s.remaining, 0);
-  const net = balance + owedToYou - youOwe - loanOut;
-  const r30 = sumRange(txl, iso(addDays(ref, -29)), t), p30 = sumRange(txl, iso(addDays(ref, -59)), iso(addDays(ref, -30)));
-  const rate = r30.income ? r30.net / r30.income : 0;
-  const delta = (c: number, p: number) => (p ? `${c >= p ? "↑" : "↓"} ${pct(Math.abs((c - p) / p))} vs prior 30 days` : "No earlier data");
-
-  // Spending breakdown
-  const cats = spendByCategory(txl, iso(addDays(ref, -29)), t);
-  const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
-  const top = sorted.slice(0, 5).map(([k, v], i) => ({ k, v, c: i + 1 }));
-  if (sorted.length > 5) top.push({ k: "Everything else", v: sorted.slice(5).reduce((s, x) => s + x[1], 0), c: 7 });
-  const catTotal = sorted.reduce((s, x) => s + x[1], 0);
-
-  // Upcoming (next 30 days)
-  const horizon = addDays(ref, 30);
-  const upcoming = [
-    ...loanStats.filter((x) => x.s.next && parseISO(x.s.next.date) <= horizon).map((x) => ({ key: x.l.id, icon: <Landmark size={17} />, title: x.l.name, date: parseISO(x.s.next!.date), amount: x.s.next!.emi, href: "/loans", overdue: x.s.overdue })),
-    ...debtStats.filter((x) => x.d.direction === "borrowed" && x.s.remaining > 0 && x.d.due_date && parseISO(x.d.due_date) <= horizon).map((x) => ({ key: x.d.id, icon: <Handshake size={17} />, title: `Repay ${x.d.person_name}`, date: parseISO(x.d.due_date!), amount: x.s.remaining, href: "/borrowed", overdue: x.s.status === "Overdue" })),
-  ].sort((a, b) => a.date.getTime() - b.date.getTime());
-
-  const insight = spendingInsights(tx, catName, ref)[0];
-  const lentOpen = debtStats.filter((x) => x.d.direction === "lent" && x.s.remaining > 0);
-  const borrowedOpen = debtStats.filter((x) => x.d.direction === "borrowed" && x.s.remaining > 0);
-  const expenseCats = categories.filter((c) => c.kind === "expense" && c.name !== "EMI");
-
-  const steps = [
-    { done: accounts.length > 0, label: "Add your first account", node: <AccountButton triggerClass="btn btn-glass btn-sm" trigger="Add account" /> },
-    { done: tx.length > 0, label: "Record a transaction", node: accounts.length ? <TransactionButton accounts={accounts} categories={categories} triggerClass="btn btn-glass btn-sm" trigger="Add transaction" /> : null },
-    { done: loans.length > 0, label: "Track a loan or EMI", node: <LoanButton accounts={accounts} triggerClass="btn btn-glass btn-sm" trigger="Add loan" /> },
-    { done: budgets.length > 0, label: "Set a monthly budget", node: <BudgetButton categories={expenseCats} triggerClass="btn btn-glass btn-sm" trigger="Set budget" /> },
-  ];
-  const setupLeft = steps.filter((s) => !s.done).length;
-
+export default function Privacy() {
   return (
-    <>
-      <div className="page-head">
-        <GreetingHead first={first} serverGreeting={greetingFor(nowParts(tz).h)} serverDate={ref.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })} />
-        {accounts.length > 0 && <div className="head-actions show-mob"><TransactionButton accounts={accounts} categories={categories} trigger={<><Plus size={16} />Add transaction</>} /></div>}
+    <LegalLayout title="Privacy Policy" intro="Finance Book AI helps you keep track of your own money. This page explains, in plain words, what we collect, why, who it is shared with and how you stay in control.">
+      <section className="legal-short">
+        <h2>The short version</h2>
+        <ul>
+          <li>We never ask for your bank login, card number, PIN or OTP, and we do not connect to your bank.</li>
+          <li>The records you enter are visible only to you. We do not sell your data or show ads.</li>
+          <li>Your data is stored with trusted service providers (listed below) that run the app for us.</li>
+          <li>You can download everything or delete your account at any time from Settings.</li>
+        </ul>
+      </section>
+
+      <h2>1. What we collect</h2>
+      <h3>Account details</h3>
+      <p>Your name and email address, and a password if you sign up with email. Passwords are never stored in readable form; they are hashed by our authentication provider.</p>
+      <h3>If you sign in with Google</h3>
+      <p>Google tells us your name and email address, and it also passes along your Google profile picture address. We use the name and email only to create and recognise your account, and we do not display or copy your Google picture. We do not ask for access to your Gmail, contacts, Drive, calendar or any other Google data.</p>
+      <h3>Country and time zone</h3>
+<p>At sign-up we suggest your country, time zone and currency from your device’s clock settings, and you can change them. We store your choices so that dates, due reminders and your greeting follow your local time. We do not collect your location.</p>
+      <h3>Profile picture and gender (optional)</h3>
+<p>You can choose a built-in picture or upload your own photo, and you can say whether you are male, female or prefer not to say. Gender is used only to choose a default picture. A photo is cropped and resized on your own device, then stored in your account in our database. It is shown only to you and is deleted when you remove it or delete your account. Please do not upload photos of other people.</p>
+      <h3>Money records you enter</h3>
+      <p>Accounts (by name and balance), transactions, categories, loans and EMIs, money you have lent or borrowed, budgets and savings goals, and your settings such as currency and theme. You choose what to enter. We do not read your bank statements or messages.</p>
+      <h3>Receipts and photos (optional)</h3>
+      <p>When you add or edit a transaction you may attach up to three receipt or photo images. They are shrunk on your device, stored in your account in our database and shown only to you. They are deleted when you remove them, delete the transaction or delete your account. They are not included in the JSON backup, but you can open and save each one from its transaction. Please cover card numbers, OTPs and other people’s personal details before uploading.</p>
+      <h3>Questions you ask Sam</h3>
+      <p>See section 4 for exactly what is sent when you use the Ask Sam assistant.</p>
+      <h3>Technical data</h3>
+      <p>Like any website, our hosting provider sees your IP address, browser type and the pages requested, and keeps short-lived server logs for security and reliability. We do not use these to build advertising profiles.</p>
+      <h3>What we do not collect</h3>
+      <p>Bank or card credentials, PINs, OTPs, SMS or notification content, your contacts, your precise location, or your photos.</p>
+
+      <h2>2. How we use it</h2>
+      <ul>
+        <li>To run the app: sign you in, show your balances, spending, loans, budgets and goals, and let you export your data.</li>
+        <li>To answer your questions when you use Sam.</li>
+        <li>To keep the service secure, prevent abuse (for example, a daily limit on assistant messages) and fix problems.</li>
+        <li>To send essential emails such as account confirmation and password reset.</li>
+      </ul>
+      <p>We do not use your records for advertising, and we do not sell or rent them.</p>
+
+      <h2>3. Who we share it with</h2>
+      <p>We use these service providers to operate Finance Book AI. They process data on our behalf and only to provide their service.</p>
+      <div className="legal-table" role="table" aria-label="Service providers">
+        <div role="row" className="lt-h"><span role="columnheader">Provider</span><span role="columnheader">What it does</span><span role="columnheader">Data involved</span></div>
+        <div role="row"><span role="cell"><a href="https://supabase.com/privacy" target="_blank" rel="noreferrer">Supabase</a></span><span role="cell">Database and sign-in</span><span role="cell">Account details, your profile picture, receipts and all records you enter</span></div>
+        <div role="row"><span role="cell"><a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noreferrer">Vercel</a></span><span role="cell">Website hosting</span><span role="cell">Requests to the site, IP address, logs</span></div>
+        <div role="row"><span role="cell"><a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">Google</a></span><span role="cell">“Sign in with Google”</span><span role="cell">Name, email, profile picture (only if you choose Google sign-in)</span></div>
+        <div role="row"><span role="cell">AI provider (currently Google Gemini)</span><span role="cell">Writes Sam’s answers</span><span role="cell">Your question and the figures Sam looks up to answer it (see section 4)</span></div>
       </div>
+      <p>We may also disclose information if the law requires it, or to protect the safety and rights of our users and the service. If Finance Book AI is ever merged with or acquired by another business, we will tell you before your data is transferred and give you the choice to delete it.</p>
 
-      {sp.password === "updated" && <div className="notice ok"><CircleCheck size={17} />Your password has been updated.</div>}
+      <h2>4. The Ask Sam assistant</h2>
+      <ul>
+        <li>When you send a message, we send it, the last few messages of that chat, and the specific figures Sam looks up from your records to answer it (for example your balances, a spending summary, or loan details) to our AI provider.</li>
+        <li>Sam can only read your own records and cannot add, change or delete anything.</li>
+        <li>We do not save your chat in our database. It lives in your browser and is cleared when you start a new chat or close the page. We keep only a count of messages per day, to apply a daily limit.</li>
+        <li>The AI provider handles those requests under its own terms. Depending on the provider and plan, requests may be kept for a limited time, and on some free plans may be used to improve the provider’s products. Please do not type passwords, OTPs or card numbers into the chat.</li>
+        <li>Sam can make mistakes. Check important figures against your records, and do not treat answers as financial, tax or legal advice.</li>
+      </ul>
 
-      {setupLeft > 0 && (
-        <section className="card g3" aria-label="Get set up">
-          <div className="card-head"><div><h3 className="h3">{sp.welcome ? `Welcome to Finance Book AI, ${first}` : "Finish setting up"}</h3><div className="sub">{4 - setupLeft} of 4 done. Your dashboard fills in as you go.</div></div></div>
-          <div className="rows">
-            {steps.map((s) => (
-              <div className="row" key={s.label}>
-                <span className="ic" style={s.done ? { background: "var(--pos-soft)", color: "var(--pos)" } : undefined}>{s.done ? <CircleCheck size={17} /> : <Plus size={17} />}</span>
-                <div className="bd"><div className="t" style={s.done ? { color: "var(--ink-3)", textDecoration: "line-through" } : undefined}>{s.label}</div></div>
-                {!s.done && s.node}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      <h2>5. Cookies and similar storage</h2>
+      <p>We use only what is needed to run the app: secure cookies that keep you signed in, and a small browser setting that remembers your light or dark theme. We do not use advertising or third-party analytics cookies.</p>
 
-      <div className="grid">
-        <section className="overview g3 s12" aria-label="Financial overview">
-          <div>
-            <div className="eyebrow">Net worth</div>
-            <div className="big-num" style={{ marginTop: 10 }}><CountUp to={net} paise /></div>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
-              <span className={`pill plain ${r30.net >= 0 ? "pos" : "neg"}`}>{formatINR(r30.net, { sign: true })} in 30 days</span>
-              <span className="pill plain">Balance {compactINR(balance)}</span>
-            </div>
-            <p className="xs muted" style={{ margin: "14px 0 0" }}>Accounts {compactINR(balance)} + owed to you {compactINR(owedToYou)} − loans {compactINR(loanOut)} − borrowed {compactINR(youOwe)}</p>
-          </div>
-          <div className="kpis">
-            <div className="kpi"><div className="k"><ArrowDownLeft size={14} />Income · 30d</div><div className="v"><CountUp to={r30.income} paise /></div><div className="d muted">{delta(r30.income, p30.income)}</div></div>
-            <div className="kpi"><div className="k"><ArrowUpRight size={14} />Expenses · 30d</div><div className="v"><CountUp to={r30.expense} paise /></div><div className={`d ${p30.expense && r30.expense > p30.expense ? "warn-t" : "muted"}`}>{delta(r30.expense, p30.expense)}</div></div>
-            <div className="kpi"><div className="k"><PiggyBank size={14} />Saved · 30d</div><div className={`v ${r30.net >= 0 ? "pos-t" : "neg-t"}`}><CountUp to={r30.net} paise /></div><div className="d muted">Savings rate {pct(rate, 1)}</div></div>
-            <div className="kpi"><div className="k"><Wallet size={14} />Available cash</div><div className="v"><CountUp to={available} paise /></div><div className="d muted">Excludes savings accounts</div></div>
-            <div className="kpi"><div className="k"><Landmark size={14} />EMIs per month</div><div className="v"><CountUp to={emiMonthly} paise /></div><div className="d muted">{loanStats.filter((x) => x.s.next).length} active loans</div></div>
-            <div className="kpi"><div className="k"><TrendingUp size={14} />Owed to you</div><div className="v"><CountUp to={owedToYou} paise /></div><div className="d muted">{lentOpen.length} people</div></div>
-          </div>
-        </section>
+      <h2>6. Where your data is stored</h2>
+      <p>Our providers run servers in different countries, so your data may be processed outside India. We choose providers that use encryption in transit and at rest and have their own security and privacy commitments.</p>
 
-        {insights && (
-          <section className="card g2 s4" aria-label="Finance Book Score">
-            <div className="card-head"><div><h3 className="h3">Finance Book Score</h3><div className="sub">Savings, debt, EMIs, habits, cushion, goals</div></div><Link className="link" href="/health">Details <ChevronRight size={14} /></Link></div>
-            {insights.health.now.ready ? (
-              <div className="dash-score">
-                <ScoreRing score={insights.health.now.score} label={insights.health.now.label} size={140} />
-                <span className={`pill plain ${LABEL_TONE[insights.health.now.label]}`}>{insights.health.now.label}{insights.health.change && insights.health.change.points !== 0 ? ` · ${insights.health.change.points > 0 ? "+" : "−"}${Math.abs(insights.health.change.points)} this month` : ""}</span>
-                {insights.health.change && <p className="small muted" style={{ margin: 0 }}>{insights.health.change.summary}</p>}
-              </div>
-            ) : <Empty icon={<Gauge size={26} />} title="Score on its way" body="Record a full month of income and spending to see it." />}
-          </section>
-        )}
+      <h2>7. How long we keep it</h2>
+      <p>We keep your data while your account is open. When you delete your account in Settings, your profile and every record you entered are deleted from our database straight away. Provider backups and server logs are cleared on the provider’s normal schedule. If you only stop using the app, your data stays until you delete it.</p>
 
-        {insights && (
-          <section className="card g2 s8" aria-label="Smart alerts">
-            <div className="card-head"><div><h3 className="h3">Smart alerts</h3><div className="sub">{insights.alerts.length ? `${insights.alerts.length} for you right now` : "Based on your own records"}</div></div><Link className="link" href="/alerts">All <ChevronRight size={14} /></Link></div>
-            {insights.alerts.length ? <div className="rec-list">{insights.alerts.slice(0, 4).map((a) => <AlertCard key={a.id} a={a} compact />)}</div>
-              : <Empty icon={<BellRing size={26} />} title="All clear" body="No payments due soon and spending is in line with your usual." />}
-          </section>
-        )}
+      <h2>8. Your rights and choices</h2>
+      <ul>
+        <li><b>Access and portability:</b> Settings → Your data lets you download everything you have recorded.</li>
+        <li><b>Correction:</b> you can edit or delete any record in the app, and update your profile.</li>
+        <li><b>Erasure:</b> Settings → Delete account removes your account and records.</li>
+        <li><b>Withdraw consent:</b> stop using Sam, or sign out and delete your account, at any time.</li>
+        <li><b>Complaints:</b> if you think we have handled your data wrongly, contact us first. You may also have the right to complain to your data protection authority. Under India’s Digital Personal Data Protection Act, 2023 you have rights to access, correction, erasure and grievance redressal, and you can use the contact details below.</li>
+      </ul>
 
-        <section className="card g2 s8"><CashFlowChart series={cashflowSeries(tx, ref)} /></section>
+      <h2>9. Security</h2>
+      <p>Connections are encrypted with HTTPS. Every table is protected by row-level security in the database, so each signed-in user can read and change only their own rows. Passwords are hashed. No system is perfectly secure, so please use a strong, unique password and keep your devices updated. If we learn of a breach that affects you, we will tell you as the law requires.</p>
 
-        <section className="card g2 s4">
-          <div className="card-head"><div><h3 className="h3">Spending breakdown</h3><div className="sub">Last 30 days</div></div><Link className="link" href="/budgets">Budgets <ChevronRight size={14} /></Link></div>
-          {catTotal ? (
-            <div className="donut-wrap">
-              <div className="donut"><Donut items={top} /><div className="c"><span className="xs muted">Spent</span><b>{compactINR(catTotal)}</b></div></div>
-              <div className="leg-list">{top.map((x) => (
-                <div className="leg-row" key={x.k}><span className="sw" style={{ background: `var(--c${x.c})` }} /><span className="n">{x.k}</span><span className="a">{compactINR(x.v)}</span><span className="p">{Math.round((x.v / catTotal) * 100)}%</span></div>
-              ))}</div>
-            </div>
-          ) : <Empty icon={<ChartPie size={26} />} title="No spending yet" body="Expenses from the last 30 days will appear here." />}
-        </section>
+      <h2>10. Children</h2>
+      <p>Finance Book AI is meant for people aged 18 and over. We do not knowingly collect data from children. If you believe a child has created an account, tell us and we will delete it.</p>
 
-        <section className="insight g3 s4 half">
-          <span className="glow" />
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}><span className="ai-dot"><Sparkles size={16} /></span><div><h3 className="h3">Sam’s insight</h3><div className="xs muted">From your last 120 days</div></div></div>
-          {insight ? (
-            <>
-              <div className="big">Your {insight.cat.toLowerCase()} spending is {pct(insight.pct)} higher than your 3-month average.</div>
-              <div className="calcbox">
-                <div className="ln"><span>Last 30 days</span><span>{formatINR(insight.cur)}</span></div>
-                <div className="ln"><span>3-month monthly average</span><span>{formatINR(insight.avg)}</span></div>
-                <div className="ln tot"><span>Difference</span><span>{formatINR(insight.diff, { sign: true })}</span></div>
-              </div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}><span className="tag actual">Recorded data</span><span className="tag calc">Calculated</span></div>
-            </>
-          ) : (
-            <>
-              <div className="big">{tx.length ? "Your spending is in line with your recent average." : "Insights appear once you’ve recorded a few weeks of spending."}</div>
-              <p className="small muted" style={{ margin: 0 }}>Sam compares each category’s last 30 days with its previous 3-month average and flags meaningful jumps.</p>
-            </>
-          )}
-          <Link href="/assistant" className="link" style={{ alignSelf: "end" }}>Ask Sam a question <ChevronRight size={14} /></Link>
-        </section>
+      <h2>11. Changes to this policy</h2>
+      <p>If we make important changes, we will update the date at the top of this page and, where appropriate, tell you in the app or by email.</p>
 
-        <section className="card g2 s4 half">
-          <div className="card-head"><div><h3 className="h3">Upcoming payments</h3><div className="sub">Next 30 days · {formatINR(upcoming.reduce((s, x) => s + x.amount, 0))}</div></div></div>
-          {upcoming.length ? (
-            <div className="rows">{upcoming.slice(0, 5).map((u) => (
-              <Link href={u.href} className="row click" key={u.key}><span className="ic">{u.icon}</span><div className="bd"><div className="t">{u.title}</div><div className="s">{u.overdue ? <span className="neg-t">Overdue</span> : relDay(u.date, ref)} · {fmtShort(iso(u.date))}</div></div><div className="amt">{formatINR(u.amount)}</div></Link>
-            ))}</div>
-          ) : <Empty icon={<CalendarCheck size={26} />} title="Nothing due" body="EMIs and repayments due in the next 30 days show up here." />}
-        </section>
-
-        <section className="card g2 s4">
-          <div className="card-head"><div><h3 className="h3">Savings goals</h3><div className="sub">{goals.length} active</div></div><Link className="link" href="/goals">Goals <ChevronRight size={14} /></Link></div>
-          {goals.length ? (
-            <div style={{ display: "grid", gap: 16 }}>{goals.slice(0, 4).map((g) => { const p = g.saved / g.target; return (
-              <div key={g.id}><div style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 13.5, marginBottom: 7 }}><b style={{ fontWeight: 560 }}>{g.name}</b><span className="num muted">{compactINR(g.saved)} / {compactINR(g.target)}</span></div><div className={`bar ${p >= 1 ? "pos" : "acc"}`}><i style={{ width: `${Math.min(100, p * 100)}%` }} /></div></div>
-            ); })}</div>
-          ) : <Empty icon={<Target size={26} />} title="No goals yet" body="Set a target and Sam works out the monthly number."><Link href="/goals" className="btn btn-glass btn-sm">Create a goal</Link></Empty>}
-        </section>
-
-        {insights?.forecast.ready && (
-          <section className="card g2 s6" aria-label="Forecast">
-            <div className="card-head"><div><h3 className="h3">Looking ahead</h3><div className="sub">{insights.forecast.next.label} · estimate</div></div><Link className="link" href="/forecast">Forecast <ChevronRight size={14} /></Link></div>
-            <p className="fc-headline" style={{ fontSize: 20, margin: "0 0 14px" }}>{insights.forecast.headline}</p>
-            <div className="rows">
-              <div className="row"><span className="ic"><Landmark size={17} /></span><div className="bd"><div className="t">EMIs and bills next month</div><div className="s">EMIs, rent, bills and subscriptions</div></div><div className="amt">{formatINR(insights.forecast.recurring.total)}</div></div>
-              <div className="row"><span className="ic"><Wallet size={17} /></span><div className="bd"><div className="t">Cash at end of month</div><div className="s">If current spending continues</div></div><div className={`amt ${insights.forecast.thisMonth.endCash < 0 ? "neg-t" : ""}`}>{formatINR(insights.forecast.thisMonth.endCash)}</div></div>
-              <div className="row"><span className="ic"><PiggyBank size={17} /></span><div className="bd"><div className="t">Saved over 12 months</div><div className="s">At your usual pace</div></div><div className="amt">{formatINR(insights.forecast.projection.total)}</div></div>
-            </div>
-          </section>
-        )}
-
-        {insights && insights.recs.items.length > 0 && (
-          <section className="card g2 s6" aria-label="Recommendations">
-            <div className="card-head"><div><h3 className="h3">Recommended for you</h3><div className="sub">From your own numbers</div></div><Link className="link" href="/recommendations">All <ChevronRight size={14} /></Link></div>
-            <div className="rec-list">{insights.recs.items.slice(0, 3).map((r) => <RecCard key={r.id} r={r} compact />)}</div>
-          </section>
-        )}
-
-        <section className="card g2 s6">
-          <div className="card-head"><div><h3 className="h3">Money owed to you</h3><div className="sub">{formatINR(owedToYou)} outstanding</div></div><Link className="link" href="/lent">Money lent <ChevronRight size={14} /></Link></div>
-          {lentOpen.length ? <div className="rows">{lentOpen.map(({ d, s }) => (
-            <Link href="/lent" className="row click" key={d.id}><span className="av">{d.person_name.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase()}</span><div className="bd"><div className="t">{d.person_name}</div><div className="s">{d.due_date ? `Expected ${fmtDate(d.due_date)}` : "No due date"}</div></div><span className={`pill hide-mob ${s.status === "Overdue" ? "neg" : s.status === "Partially paid" ? "warn" : "info"}`}>{s.status}</span><div className="amt pos-t">{formatINR(s.remaining)}</div></Link>
-          ))}</div> : <Empty icon={<HandCoins size={26} />} title="Nobody owes you" body="Money you lend to friends and family shows up here." />}
-        </section>
-
-        <section className="card g2 s6">
-          <div className="card-head"><div><h3 className="h3">Money you owe</h3><div className="sub">{formatINR(loanOut + youOwe)} across loans and people</div></div><Link className="link" href="/loans">Loans <ChevronRight size={14} /></Link></div>
-          {loanStats.length || borrowedOpen.length ? <div className="rows">
-            {loanStats.filter((x) => x.s.outstanding > 0).map(({ l, s }) => <Link href="/loans" className="row click" key={l.id}><span className="ic"><Landmark size={17} /></span><div className="bd"><div className="t">{l.name}</div><div className="s">{l.lender || "Loan"} · {s.remaining} EMIs left</div></div><div className="amt neg-t">{formatINR(s.outstanding)}</div></Link>)}
-            {borrowedOpen.map(({ d, s }) => <Link href="/borrowed" className="row click" key={d.id}><span className="av">{d.person_name.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase()}</span><div className="bd"><div className="t">{d.person_name}</div><div className="s">{d.due_date ? `Due ${fmtDate(d.due_date)}` : "No due date"}</div></div><div className="amt neg-t">{formatINR(s.remaining)}</div></Link>)}
-          </div> : <Empty icon={<Handshake size={26} />} title="You owe nothing" body="Loans and money you borrow will appear here." />}
-        </section>
-      </div>
-    </>
+      <h2>12. Contact</h2>
+      <ContactLine />
+    </LegalLayout>
   );
 }

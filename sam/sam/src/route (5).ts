@@ -1,43 +1,53 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { getTimezone } from "@/lib/auth";
+import { runAssistant } from "@/lib/assistant/run";
+import { systemPrompt } from "@/lib/assistant/prompt";
+import { takeMessage } from "@/lib/assistant/limit";
+import { aiConfigured } from "@/lib/assistant/config";
 
-/** Lets a signed-in user download their own data. RLS guarantees only their rows are returned. */
-export async function GET(request: NextRequest) {
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
+const body = z.object({
+  messages: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().trim().min(1).max(2000) })).min(1).max(30),
+});
+
+const json = (status: number, error: string) =>
+  new Response(JSON.stringify({ error }), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+
+export async function POST(req: Request) {
+  // Cookie-authenticated endpoint: only accept same-origin browser requests.
+  const origin = req.headers.get("origin");
+  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
+  if (origin) { try { if (new URL(origin).host !== host) return json(403, "forbidden"); } catch { return json(403, "forbidden"); } }
+
+  if (!aiConfigured()) return json(503, "not_configured");
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Sign in to export your data." }, { status: 401 });
-  const format = request.nextUrl.searchParams.get("format") === "json" ? "json" : "csv";
-  const stamp = new Date().toISOString().slice(0, 10);
+  if (!user) return json(401, "unauthorized");
 
-  if (format === "json") {
-    const tables = ["profiles", "accounts", "categories", "transactions", "loans", "loan_payments", "debts", "debt_payments", "budgets", "goals", "goal_contributions"] as const;
-    const out: Record<string, unknown> = { exported_at: new Date().toISOString(), money_unit: "paise (1/100 INR)" };
-    for (const t of tables) {
-      const q = supabase.from(t).select(t === "profiles" ? "id, full_name, currency, country, income_range, goals, notify_emi, notify_bills, notify_lent, notify_budget, onboarded, gender, avatar_kind, avatar_key, created_at, updated_at" : "*");
-      const { data, error } = t === "categories" ? await q.eq("user_id", user.id) : await q;
-      if (error) return NextResponse.json({ error: "We couldn’t prepare your export. Please try again." }, { status: 500 });
-      out[t === "categories" ? "custom_categories" : t] = data;
-    }
-    return new NextResponse(JSON.stringify(out, null, 2), {
-      headers: { "Content-Type": "application/json; charset=utf-8", "Content-Disposition": `attachment; filename="finance-book-ai-backup-${stamp}.json"`, "Cache-Control": "no-store" },
-    });
-  }
+  let parsed;
+  try { parsed = body.parse(await req.json()); } catch { return json(400, "bad_request"); }
+  const msgs = parsed.messages.slice(-12);
+  if (msgs[0].role !== "user") msgs.shift();
+  if (!msgs.length || msgs[msgs.length - 1].role !== "user") return json(400, "bad_request");
 
-  const [{ data: tx, error }, { data: accts }, { data: cats }] = await Promise.all([
-    supabase.from("transactions").select("*").order("occurred_on", { ascending: false }),
-    supabase.from("accounts").select("id,name"),
-    supabase.from("categories").select("id,name"),
-  ]);
-  if (error) return NextResponse.json({ error: "We couldn’t prepare your export. Please try again." }, { status: 500 });
-  const an = new Map((accts ?? []).map((a) => [a.id, a.name]));
-  const cn = new Map((cats ?? []).map((c) => [c.id, c.name]));
-  // Prefix cells that start with formula characters so spreadsheets don't execute them.
-  const cell = (v: unknown) => { let s = String(v ?? ""); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
-  const lines = ["Date,Type,Amount (INR),Category,Account,From account,To account,Merchant or person,Description,Payment method,Notes"];
-  for (const t of tx ?? []) {
-    lines.push([t.occurred_on, t.type, (Number(t.amount) / 100).toFixed(2), cn.get(t.category_id) ?? "", an.get(t.account_id) ?? "", an.get(t.from_account_id) ?? "", an.get(t.to_account_id) ?? "", t.counterparty, t.description, t.payment_method, t.notes].map(cell).join(","));
-  }
-  return new NextResponse("﻿" + lines.join("\n"), {
-    headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="finance-book-ai-transactions-${stamp}.csv"`, "Cache-Control": "no-store" },
+  if (!(await takeMessage(supabase, user.id))) return json(429, "daily_limit");
+
+  const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+  const timeZone = await getTimezone();
+  const raw = ((profile?.full_name as string | null) || "").trim().split(" ")[0] || "there";
+  const system = systemPrompt({ firstName: raw.charAt(0).toUpperCase() + raw.slice(1), now: new Date(), timeZone });
+
+  const enc = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        for await (const ev of runAssistant({ system, messages: msgs, signal: req.signal })) controller.enqueue(enc.encode(JSON.stringify(ev) + "\n"));
+      } finally { controller.close(); }
+    },
   });
+  return new Response(stream, { headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store, no-transform", "X-Accel-Buffering": "no" } });
 }
