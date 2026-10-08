@@ -19,6 +19,8 @@ const FIXED_LIKE = new Set(["Housing", "Bills", "Subscriptions", "EMI"]);
 const when = (n: number) => (n < 0 ? `${-n} ${-n === 1 ? "day" : "days"} ago` : n === 0 ? "today" : n === 1 ? "tomorrow" : `in ${n} days`);
 const short = (s: string) => parseISO(s).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 const lower = (s: string) => s.toLowerCase();
+/** "Car loan" becomes "Car loan EMI", but "Phone on EMI" stays as it is. */
+export const emiName = (name: string) => (/\bemis?\b/i.test(name) ? name : `${name} EMI`);
 
 export function buildAlerts(input: FxInput, f: Forecast, health?: HealthReport | null): Alert[] {
   const out: Alert[] = [];
@@ -34,8 +36,8 @@ export function buildAlerts(input: FxInput, f: Forecast, health?: HealthReport |
     const n = day(s.next.date), emi = s.next.emi;
     if (n > 7) continue;
     const short$ = available < emi ? ` Your available cash is ${formatINR(available)}, which is less than the EMI, so make sure the money is in your account.` : "";
-    if (n < 0) out.push({ id: `emi-${l.id}`, level: "urgent", kind: "due", title: `Your ${formatINR(emi)} ${l.name} EMI is overdue`, body: `It was due on ${short(s.next.date)}, ${when(n)}. Pay it as soon as you can to avoid late charges, and mark it as paid once done.${short$}`, href: "/loans", cta: "Open loans" });
-    else out.push({ id: `emi-${l.id}`, level: n <= 2 || short$ ? "urgent" : "heads_up", kind: "due", title: `Your ${formatINR(emi)} ${l.name} EMI is due ${when(n)}`, body: `Instalment ${s.next.n} of ${l.tenure_months} is due on ${short(s.next.date)}.${short$}`, href: "/loans", cta: "Open loans" });
+    if (n < 0) out.push({ id: `emi-${l.id}`, level: "urgent", kind: "due", title: `Your ${formatINR(emi)} ${emiName(l.name)} is overdue`, body: `It was due on ${short(s.next.date)}, ${when(n)}. Pay it as soon as you can to avoid late charges, and mark it as paid once done.${short$}`, href: "/loans", cta: "Open loans" });
+    else out.push({ id: `emi-${l.id}`, level: n <= 2 || short$ ? "urgent" : "heads_up", kind: "due", title: `Your ${formatINR(emi)} ${emiName(l.name)} is due ${when(n)}`, body: `Instalment ${s.next.n} of ${l.tenure_months} is due on ${short(s.next.date)}.${short$}`, href: "/loans", cta: "Open loans" });
   }
 
   // ── money you lent or owe ──

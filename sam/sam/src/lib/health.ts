@@ -200,7 +200,7 @@ function explain(now: HealthScore, prev: HealthScore): ScoreChange {
   if (points === 0 && !drivers.length) summary = "Your score is the same as a month ago.";
   else {
     const dir = points > 0 ? "rose" : points < 0 ? "fell" : "held steady";
-    const main = drivers.filter((d) => (points >= 0 ? d.points > 0 : d.points < 0)).slice(0, 2).map((d) => d.name.toLowerCase());
+    const main = drivers.filter((d) => (points >= 0 ? d.points > 0 : d.points < 0)).slice(0, 2).map((d) => d.name.toLowerCase().replace(/\bemi\b/, "EMI"));
     summary = `Your score ${dir}${points ? ` by ${Math.abs(points)} ${Math.abs(points) === 1 ? "point" : "points"}` : ""} since a month ago${main.length ? `, mainly because of ${main.join(" and ")}` : ""}.`;
   }
   return { points, summary, drivers };

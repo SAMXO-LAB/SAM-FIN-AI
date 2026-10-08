@@ -142,7 +142,7 @@ export async function recordEmi(_: ActionState, fd: FormData): Promise<ActionSta
     const { data: cat } = await supabase.from("categories").select("id").is("user_id", null).eq("kind", "expense").eq("name", "EMI").maybeSingle();
     const { data: tx, error: te } = await supabase.from("transactions").insert({
       type: "expense", amount, occurred_on: paid_on, account_id, category_id: cat?.id ?? null, counterparty: loan.lender,
-      description: `${loan.name} EMI ${n}/${loan.tenure_months}`, payment_method: "auto_debit", is_recurring: true, loan_id: loan.id,
+      description: `${/\bemis?\b/i.test(loan.name) ? loan.name : `${loan.name} EMI`} ${n}/${loan.tenure_months}`, payment_method: "auto_debit", is_recurring: true, loan_id: loan.id,
     }).select("id").single();
     if (te) return fail("record the EMI", te);
     transaction_id = tx.id;

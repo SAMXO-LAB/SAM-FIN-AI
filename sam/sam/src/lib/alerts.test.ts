@@ -29,6 +29,10 @@ describe("EMI alerts", () => {
     expect(a.level).toBe("heads_up");
     expect(a.href).toBe("/loans");
   });
+  it("does not say EMI twice when the loan name already has it", () => {
+    const a = run(base({ loans: [loan("2026-05-15", 5, { name: "Phone on EMI" })] })).find((x) => x.id === "emi-l1")!;
+    expect(a.title).toBe("Your ₹12,000 Phone on EMI is due in 3 days");
+  });
   it("is urgent when due within two days or when cash is short", () => {
     expect(run(base({ loans: [loan("2026-05-13")] })).find((x) => x.id === "emi-l1")!.level).toBe("urgent");
     const poor = run(base({ loans: [loan("2026-05-17")], accounts: [{ type: "bank", balance: R(5000) }] })).find((x) => x.id === "emi-l1")!;

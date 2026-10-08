@@ -3,6 +3,7 @@
  * so each figure can be traced back to their records. These are suggestions, not financial advice.
  */
 import { simulatePrepayment } from "./assistant/calc";
+import { emiName } from "./alerts";
 import { debtSummary, loanSummary } from "./finance";
 import { formatINR } from "./money";
 import { parseISO, iso } from "./dates";
@@ -31,7 +32,7 @@ export function buildRecommendations(input: FxInput, f: Forecast): { ready: bool
   // ── overdue EMIs ──
   const overdue = loans.map((l) => ({ l, s: loanSummary(l, l.paid, ref) })).filter((x) => x.s.overdue && x.s.next);
   for (const { l, s } of overdue) {
-    out.push({ id: `overdue-${l.id}`, priority: "high", kind: "emi", title: `Clear your overdue ${l.name} EMI`, weight: s.next!.emi * 3,
+    out.push({ id: `overdue-${l.id}`, priority: "high", kind: "emi", title: `Clear your overdue ${emiName(l.name)}`, weight: s.next!.emi * 3,
       body: `The ${formatINR(s.next!.emi)} instalment due ${shortDate(s.next!.date)} has not been marked paid. Paying it first avoids late charges and protects your credit score. If you have already paid, mark it as paid so your forecast stays accurate.`,
       href: "/loans", cta: "Open loans" });
   }
