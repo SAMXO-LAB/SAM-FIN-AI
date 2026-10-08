@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowUp, Copy, Check, RotateCcw, Sparkles, Square } from "lucide-react";
 import { Md } from "./Md";
+import { useTypingHint } from "@/features/finance/useTypingHint";
 
 type Turn = { id: number; role: "user" | "assistant"; content: string; tools: string[]; state?: "streaming" | "done" | "error"; error?: string };
 
@@ -13,6 +14,7 @@ const SUGGESTIONS = [
   "How am I doing this month?", "Where did most of my money go in the last 30 days?", "How much do I still owe on my loans?",
   "Who owes me money?", "Am I on track with my budgets?", "What EMI would a ₹5 lakh loan at 10.5% for 3 years be?",
 ];
+const HINTS = ["how am I doing this month?", "where did my money go?", "what is my Finance Book Score?", "who owes me money?", "when does my next EMI fall due?", "can I afford a ₹20,000 purchase?"];
 const ERRORS: Record<string, string> = {
   not_configured: "Sam isn’t switched on for this site yet. The site owner needs to add an AI key.",
   daily_limit: "You’ve used today’s messages with Sam. Try again tomorrow.",
@@ -25,6 +27,7 @@ const ERRORS: Record<string, string> = {
 export function AssistantChat({ firstName, configured, initialQuestion = "" }: { firstName: string; configured: boolean; initialQuestion?: string }) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
+  const hint = useTypingHint("Ask Sam: ", HINTS);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState<number | null>(null);
   const abort = useRef<AbortController | null>(null);
@@ -131,8 +134,10 @@ export function AssistantChat({ firstName, configured, initialQuestion = "" }: {
       <div className="chat-foot">
         <form className="chat-form" onSubmit={(e) => { e.preventDefault(); send(input, turns); }}>
           <label className="sr" htmlFor="sam-input">Message Sam</label>
-          <textarea id="sam-input" ref={area} className="input chat-input" rows={1} value={input} maxLength={2000} placeholder={configured ? "Ask Sam about your money…" : "Sam isn’t switched on yet"} disabled={!configured}
+          <div className={`ask-field${busy ? " thinking" : ""}`}>
+            <textarea id="sam-input" ref={area} className="input chat-input" rows={1} value={input} maxLength={2000} placeholder={configured ? hint : "Sam isn’t switched on yet"} disabled={!configured}
             onChange={(e) => setInput(e.target.value)} onKeyDown={onKey} />
+          </div>
           {busy
             ? <button type="button" className="btn btn-glass chat-send" onClick={() => abort.current?.abort()} aria-label="Stop"><Square size={14} fill="currentColor" /></button>
             : <button type="submit" className="btn btn-primary chat-send" disabled={!input.trim() || !configured} aria-label="Send"><ArrowUp size={18} /></button>}
