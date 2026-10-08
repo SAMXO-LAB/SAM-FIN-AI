@@ -16,7 +16,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <li><BellRing size={18} />Every EMI and repayment due date in one view.</li>
           </ul>
         </div>
-        <span className="xs muted">© {new Date().getFullYear()} Finance Book AI · Developed by Chandra Shekar · <Link href="/privacy">Privacy</Link> · <Link href="/terms">Terms</Link></span>
+        <span className="xs muted">© {new Date().getFullYear()} Finance Book AI · Developed by Chandra Shekar (SAM) · <Link href="/privacy">Privacy</Link> · <Link href="/terms">Terms</Link></span>
       </aside>
       <main className="auth-main">
         <Link href="/" className="auth-mobile-brand" aria-label="Finance Book AI home"><Brand /></Link>
