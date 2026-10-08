@@ -7,7 +7,7 @@ type Turn = { id: number; role: "user" | "assistant"; content: string; tools: st
 
 const TOOL_LABEL: Record<string, string> = {
   get_overview: "Your overview", get_transactions: "Transactions", spending_summary: "Spending", get_loans: "Loans & EMIs", get_debts: "Money lent & borrowed",
-  get_budgets: "Budgets", get_goals: "Goals", calculate_emi: "EMI calculator", simulate_prepayment: "Prepayment calculator",
+  get_budgets: "Budgets", get_goals: "Goals", get_forecast: "Forecast", get_recommendations: "Recommendations", get_health_score: "Health score", get_alerts: "Alerts", calculate_emi: "EMI calculator", simulate_prepayment: "Prepayment calculator",
 };
 const SUGGESTIONS = [
   "How am I doing this month?", "Where did most of my money go in the last 30 days?", "How much do I still owe on my loans?",
@@ -22,7 +22,7 @@ const ERRORS: Record<string, string> = {
   failed: "Something went wrong on my side. Please try again.",
 };
 
-export function AssistantChat({ firstName, configured }: { firstName: string; configured: boolean }) {
+export function AssistantChat({ firstName, configured, initialQuestion = "" }: { firstName: string; configured: boolean; initialQuestion?: string }) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -78,6 +78,15 @@ export function AssistantChat({ firstName, configured }: { firstName: string; co
       else patch(aid, (t) => ({ ...t, state: "error", error: ERRORS.failed }));
     } finally { setBusy(false); abort.current = null; area.current?.focus(); }
   }, [busy]);
+
+  // A question passed from the dashboard (?q=) is asked once, then removed from the address so a refresh does not repeat it.
+  const asked = useRef(false);
+  useEffect(() => {
+    if (!initialQuestion || asked.current || !configured) return;
+    asked.current = true;
+    try { window.history.replaceState(null, "", "/assistant"); } catch { /* ignore */ }
+    send(initialQuestion, []);
+  }, [initialQuestion, configured, send]);
 
   const retry = (aid: number) => {
     const i = turns.findIndex((t) => t.id === aid); if (i < 1) return;

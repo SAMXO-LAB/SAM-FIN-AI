@@ -14,6 +14,8 @@ import { CashFlowChart } from "@/components/charts/CashFlowChart";
 import { Donut } from "@/components/charts/Donut";
 import { Empty } from "@/components/ui/Page";
 import { GreetingHead } from "@/features/finance/Greeting";
+import { AskSam } from "@/features/finance/AskSam";
+import { aiConfigured } from "@/lib/assistant/config";
 import { getInsights } from "@/lib/insights";
 import { RecCard } from "@/features/insights/RecCard";
 import { AlertCard } from "@/features/insights/AlertCard";
@@ -84,6 +86,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         <GreetingHead first={first} serverGreeting={greetingFor(nowParts(tz).h)} serverDate={ref.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })} />
         {accounts.length > 0 && <div className="head-actions show-mob"><TransactionButton accounts={accounts} categories={categories} trigger={<><Plus size={16} />Add transaction</>} /></div>}
       </div>
+
+      {aiConfigured() && <AskSam firstName={first} />}
 
       {sp.password === "updated" && <div className="notice ok"><CircleCheck size={17} />Your password has been updated.</div>}
 

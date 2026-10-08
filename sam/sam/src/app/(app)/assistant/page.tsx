@@ -6,14 +6,15 @@ import { AssistantChat } from "./AssistantChat";
 
 export const metadata: Metadata = { title: "Ask Sam" };
 
-export default async function AssistantPage() {
+export default async function AssistantPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q } = await searchParams;
   const profile = await getProfile();
   const raw = (profile?.full_name || "there").trim().split(" ")[0];
   const first = raw.charAt(0).toUpperCase() + raw.slice(1);
   return (
     <>
       <PageHead eyebrow="Your money assistant" title="Ask Sam" sub="Plain-language answers about your accounts, spending, loans and goals." />
-      <AssistantChat firstName={first} configured={aiConfigured()} />
+      <AssistantChat firstName={first} configured={aiConfigured()} initialQuestion={typeof q === "string" ? q.trim().slice(0, 500) : ""} />
     </>
   );
 }
