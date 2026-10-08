@@ -1,4 +1,4 @@
-export type NavIcon = "Sparkles" | "LayoutDashboard" | "ArrowLeftRight" | "Wallet" | "Landmark" | "HandCoins" | "Handshake" | "ChartPie" | "Target" | "Settings";
+export type NavIcon = "Sparkles" | "LayoutDashboard" | "ArrowLeftRight" | "Wallet" | "Landmark" | "HandCoins" | "Handshake" | "ChartPie" | "Target" | "TrendingUp" | "Lightbulb" | "Gauge" | "Bell" | "Settings";
 export type NavGroup = { group: string; items: { href: string; label: string; icon: NavIcon }[] };
 
 export const NAV: NavGroup[] = [
@@ -16,6 +16,12 @@ export const NAV: NavGroup[] = [
   { group: "Planning", items: [
     { href: "/budgets", label: "Budgets", icon: "ChartPie" },
     { href: "/goals", label: "Goals", icon: "Target" },
+  ] },
+  { group: "Insights", items: [
+    { href: "/health", label: "Health Score", icon: "Gauge" },
+    { href: "/alerts", label: "Alerts", icon: "Bell" },
+    { href: "/forecast", label: "Forecast", icon: "TrendingUp" },
+    { href: "/recommendations", label: "Recommendations", icon: "Lightbulb" },
   ] },
   { group: "", items: [{ href: "/settings", label: "Settings", icon: "Settings" }] },
 ]; 

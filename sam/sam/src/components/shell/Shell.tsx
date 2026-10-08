@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
-  ArrowLeftRight, ChartPie, ChevronRight, Ellipsis, HandCoins, Handshake, House, Landmark, LayoutDashboard, LogOut, Plus, Settings, Sparkles, Target, Wallet,
+  ArrowLeftRight, Bell, ChartPie, ChevronRight, Ellipsis, Gauge, HandCoins, Handshake, House, Landmark, LayoutDashboard, Lightbulb, LogOut, Plus, Settings, Sparkles, Target, TrendingUp, Wallet,
 } from "lucide-react";
 import { Brand } from "@/components/Brand";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -14,10 +14,10 @@ import type { AccountWithBalance, Category } from "@/types/db";
 import { NAV } from "./nav";
 import { Avatar, type AvatarInfo } from "@/components/avatar/Avatar";
 
-const ICONS = { Sparkles, LayoutDashboard, ArrowLeftRight, Wallet, Landmark, HandCoins, Handshake, ChartPie, Target, Settings } as const;
+const ICONS = { Sparkles, LayoutDashboard, ArrowLeftRight, Wallet, Landmark, HandCoins, Handshake, ChartPie, Target, TrendingUp, Lightbulb, Gauge, Bell, Settings } as const;
 
-export function Shell({ name, email, me, accounts, categories, children }: {
-  name: string; email: string; me: AvatarInfo; accounts: AccountWithBalance[]; categories: Category[]; children: React.ReactNode;
+export function Shell({ name, email, me, accounts, categories, alertCount = 0, children }: {
+  alertCount?: number; name: string; email: string; me: AvatarInfo; accounts: AccountWithBalance[]; categories: Category[]; children: React.ReactNode;
 }) {
   const path = usePathname();
   const [more, setMore] = useState(false);
@@ -45,6 +45,7 @@ export function Shell({ name, email, me, accounts, categories, children }: {
         <header className="topbar g1">
           <Link href="/dashboard" className="mob-brand" aria-label="Finance Book AI dashboard"><Brand /></Link>
           <span className="sp" />
+          <Link href="/alerts" className="icon-btn" aria-label={alertCount ? `Alerts, ${alertCount} need attention` : "Alerts"} title="Alerts"><Bell size={19} />{alertCount > 0 && <span className="bell-badge" aria-hidden="true">{alertCount > 9 ? "9+" : alertCount}</span>}</Link>
           <ThemeToggle />
           <Link href="/settings" className="av-link show-mob" aria-label="Your profile and settings"><Avatar user={me} size={34} /></Link>
           <span className="hide-mob">
