@@ -1003,7 +1003,16 @@ html{scrollbar-width:thin;scrollbar-color:var(--line-strong) transparent}
 .ask-send:not(:disabled):hover{transform:translateY(-2px) scale(1.04);box-shadow:0 8px 24px rgba(79,123,234,.45)}
 @media (prefers-reduced-motion:reduce){.ask-field::before,.ask-field::after{animation:none}.ask-field::after{opacity:.3}}
 /* the chat box on the Ask Sam page glows softly while you type */
-.chat-form .chat-input:focus{border-color:transparent;box-shadow:0 0 0 2px #7c8cf0,0 0 22px rgba(124,77,255,.28)}
+.ask-field .chat-input{border:0;background:#F8FAFF;border-radius:15px;box-shadow:none;min-height:48px}
+.ask-field .chat-input:focus{box-shadow:none}
+.chat-form .ask-field{align-self:flex-end}
+:root[data-theme="dark"] .ask-field .chat-input{background:#0F1426}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ask-field .chat-input{background:#0F1426}}
 
 :root[data-theme="dark"] .ask-field .ask-input{background:#0F1426}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ask-field .ask-input{background:#0F1426}}
+.ask-field textarea{display:block}
+/* while Sam is answering, the glow speeds up */
+.ask-field.thinking::before{animation-duration:1.4s}
+.ask-field.thinking::after{opacity:.8;animation:askSpin 1.4s linear infinite}
+.ask-field textarea{resize:none!important}
